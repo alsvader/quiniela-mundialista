@@ -163,6 +163,10 @@ const { data: leakedProfiles } = await publicClient.from("profiles").select("*")
 check("anon no puede leer perfiles", !leakedProfiles?.length);
 const { data: leakedPredictions } = await publicClient.from("predictions").select("*");
 check("anon no puede leer pronósticos", !leakedPredictions?.length);
+const { data: leakedSettings } = await publicClient.from("app_settings").select("*");
+check("anon no puede leer app_settings (WhatsApp del admin)", !leakedSettings?.length);
+const { data: authedSettings } = await user.from("app_settings").select("value");
+check("autenticado sí lee app_settings", (authedSettings?.length ?? 0) > 0);
 
 // ---------- 7. Desactivación reversible ----------
 await admin.from("profiles").update({ status: "disabled" }).eq("id", userId);

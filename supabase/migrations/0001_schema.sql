@@ -196,9 +196,10 @@ create policy "predictions_update_own_active" on public.predictions
   )
   with check (public.is_match_open(match_id));
 
--- app_settings: lectura pública (deep link de WhatsApp); escritura admin
-create policy "app_settings_select_public" on public.app_settings
-  for select using (true);
+-- app_settings: lectura solo autenticados (el deep link de WhatsApp se arma
+-- server-side para usuarios con sesión; anónimos no ven el número del admin)
+create policy "app_settings_select_authenticated" on public.app_settings
+  for select to authenticated using (true);
 
 create policy "app_settings_update_admin" on public.app_settings
   for update using (public.is_admin());

@@ -154,6 +154,21 @@ Protección por layouts de segmento (`(participante)`, `admin/`) que validan ses
 - **[Empates en el ranking]** → Resuelto (D11): los empatados comparten posición visible y, en la premiación, se reparten por igual la suma de las porciones ponderadas de las posiciones que ocupan. Sin criterio externo que disputar.
 - **[Un solo admin humano como cuello de botella]** (activaciones y captura de resultados durante el torneo) → Aceptado en V1; el modelo de roles permite más admins en el futuro sin cambios de esquema.
 
+## Seguridad (auditoría pre-lanzamiento)
+
+Defensas verificadas por e2e: RLS bloquea suplantación de pronósticos, autopromoción a admin y escritura tras el cierre a nivel BD; sin SQL crudo (PostgREST parametrizado); React escapa toda interpolación; Server Actions validan Origin (CSRF); redirects fijos; `.env*` jamás commiteado.
+
+Endurecimientos aplicados: lectura de `app_settings` restringida a `authenticated` (el WhatsApp del admin no es consultable por anónimos) y cabeceras de seguridad en next.config (X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy).
+
+Riesgos aceptados V1, con control compensatorio:
+- Registro sin verificación de correo (sin correos automáticos por decisión de producto) → el admin valida identidad y pago por WhatsApp antes de activar.
+- Sin recuperación de contraseña (sin SMTP) → runbook: el admin la restablece desde el dashboard de Supabase.
+- `updated_at` de picks manipulable vía API directa → cosmético; el cierre lo garantiza `is_match_open()` en RLS y el desempate no depende de fechas.
+- Guardado parcial de jornada vía API directa → auto-perjudicial, sin ventaja competitiva.
+- Rate limiting delegado a Supabase Auth (suficiente a esta escala); CSP completa pospuesta (inline scripts de Next la complican; X-Frame-Options cubre clickjacking).
+- `npm audit`: postcss moderate embebido en Next (build-time, sin ruta runtime) → subir Next al patch siguiente; nunca `audit fix --force`.
+- Al crear el proyecto cloud: alinear contraseña mínima del dashboard a 8 (zod ya lo exige en servidor).
+
 ## Migration Plan
 
 Proyecto nuevo: sin migración de datos. Orden de despliegue: crear proyecto Supabase → aplicar migraciones de esquema + RLS → seed de fixture → deploy en Vercel con variables de entorno → ejecutar seed de admin → prueba de humo (registro, activación, pronóstico, captura, ranking). Rollback = re-deploy anterior; la base no tiene consumidores externos.

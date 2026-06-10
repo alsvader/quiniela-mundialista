@@ -100,3 +100,9 @@
 - [x] 15.2 `app/not-found.tsx` con estética Cyber-Stadium y enlaces a inicio y ranking (cubre también el `notFound()` de /admin/partidos/[id])
 - [x] 15.3 `loading.tsx` con skeletons glass (pulse) para los segmentos `(participante)` y `admin`
 - [x] 15.4 Verificación: check e2e de la 404 personalizada y suite completa (tests, e2e, lint, build)
+
+## 16. Endurecimiento de seguridad (hallazgos de auditoría)
+
+- [x] 16.1 Restringir SELECT de `app_settings` a `authenticated` (el WhatsApp del admin deja de ser legible por anónimos); amendar 0001 y `db reset` local
+- [x] 16.2 Cabeceras de seguridad en `next.config.ts`: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy mínima
+- [x] 16.3 Verificación: check de privacidad en smoke-test (anon no lee app_settings), curl de cabeceras y suite completa
