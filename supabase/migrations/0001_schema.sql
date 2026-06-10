@@ -86,6 +86,36 @@ as $$
   );
 $$;
 
+-- Correos de los usuarios para el panel admin (auth.users no es accesible vía RLS)
+create or replace function public.admin_user_emails()
+returns table (id uuid, email text)
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select u.id, u.email::text
+  from auth.users u
+  where public.is_admin();
+$$;
+
+grant execute on function public.admin_user_emails() to authenticated;
+
+-- Disponibilidad de alias durante el registro (RLS impide leer perfiles ajenos)
+create or replace function public.alias_is_available(candidate text)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select not exists (
+    select 1 from public.profiles where lower(alias) = lower(candidate)
+  );
+$$;
+
+grant execute on function public.alias_is_available(text) to anon, authenticated;
+
 -- Jornada abierta = fecha actual en CDMX anterior a la fecha del partido
 -- (equivale a "cierra 23:59 del día anterior", design.md D2)
 create or replace function public.is_match_open(mid bigint)

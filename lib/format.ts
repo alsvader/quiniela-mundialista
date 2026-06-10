@@ -1,0 +1,51 @@
+import { TIMEZONE } from "@/lib/domain/jornada";
+
+const dayFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+});
+
+const timeFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+/** "jueves 11 de junio" a partir de una fecha de jornada YYYY-MM-DD. */
+export function formatJornadaDate(matchDate: string): string {
+  return dayFormatter.format(new Date(`${matchDate}T12:00:00-06:00`));
+}
+
+/** "19:00" hora CDMX de un kickoff. */
+export function formatKickoffTime(kickoffAt: string): string {
+  return timeFormatter.format(new Date(kickoffAt));
+}
+
+/** "10 jun, 23:59" para fechas con hora (cierres, última modificación). */
+export function formatDateTime(iso: string | Date): string {
+  return dateTimeFormatter.format(typeof iso === "string" ? new Date(iso) : iso);
+}
+
+/** Fecha límite legible de una jornada: el día anterior a las 23:59. */
+export function formatDeadline(matchDate: string): string {
+  const previous = new Date(`${matchDate}T12:00:00-06:00`);
+  previous.setUTCDate(previous.getUTCDate() - 1);
+  const day = new Intl.DateTimeFormat("es-MX", {
+    timeZone: TIMEZONE,
+    day: "numeric",
+    month: "long",
+  }).format(previous);
+  return `${day} a las 23:59`;
+}
