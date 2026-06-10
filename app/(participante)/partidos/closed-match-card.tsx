@@ -1,4 +1,5 @@
 import { Chip } from "@/components/ui/chip";
+import { TeamFlag } from "@/components/team-flag";
 import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
 import type { Match } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export function ClosedMatchCard({
   const point = scored ? scorePrediction(pick, match.home_goals!, match.away_goals!) : null;
 
   return (
-    <li className="glass p-4">
+    <li className="glass group p-4">
       <div className="flex items-center justify-between gap-2">
         {match.group_label ? (
           <Chip tone="neutral">Grupo {match.group_label}</Chip>
@@ -40,7 +41,10 @@ export function ClosedMatchCard({
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 text-base font-semibold text-on-surface">
-        <span className="flex-1">{match.home_team}</span>
+        <span className="flex flex-1 items-center gap-2">
+          <TeamFlag code={match.home_code} />
+          {match.home_team}
+        </span>
         {scored ? (
           <span className="shrink-0 font-mono text-xl font-medium tracking-wider text-primary-fixed">
             {match.home_goals}–{match.away_goals}
@@ -48,7 +52,10 @@ export function ClosedMatchCard({
         ) : (
           <span className="label-data shrink-0 text-on-surface-variant">vs</span>
         )}
-        <span className="flex-1 text-right">{match.away_team}</span>
+        <span className="flex flex-1 items-center justify-end gap-2 text-right">
+          {match.away_team}
+          <TeamFlag code={match.away_code} />
+        </span>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 pt-3 text-sm">

@@ -102,6 +102,12 @@ Página de ranking pública (sin sesión), Server Component con `dynamic` render
 - **Fixture**: archivo TypeScript/SQL estático con los 72 partidos (equipos, grupo, kickoff UTC y `match_date` ya convertida a MX), aplicado como migración/seed de Supabase. El CRUD del admin existe para correcciones puntuales.
 - **Admin**: script Node con `SUPABASE_SERVICE_ROLE_KEY` que crea el usuario en Auth (`ADMIN_EMAIL`/`ADMIN_PASSWORD` de env) y upserta su perfil con `role = 'admin'`, `status = 'active'`. Idempotente para poder re-ejecutarse.
 
+### D10 — Banderas: código ISO + SVG local
+
+Cada equipo lleva su código de bandera en `matches` (`home_code`/`away_code`, text **nullable**: las eliminatorias V2 tendrán partidos "por definir" y el CRUD del admin puede omitirlos). Códigos ISO 3166-1 alfa-2 en minúsculas, con códigos regionales para naciones constituyentes (`gb-eng` Inglaterra, `gb-sct` Escocia). Los SVGs provienen del paquete `flag-icons` (MIT) y viven en el repo — sin APIs externas, consistente en todas las plataformas (los emoji de bandera no renderizan en Windows). Un componente `TeamFlag` centraliza el render con la desaturación-hasta-hover que pide DESIGN.md y el fallback "sin código → solo nombre". El mapa equipo→código vive junto al mapa de traducción en el generador del seed.
+
+*Alternativa considerada:* emoji de bandera (cero assets). Rechazada: en Windows/Chrome se renderiza como letras planas ("MX") y el estilo varía por plataforma — contradice el objetivo visual.
+
 ### D9 — Estructura de rutas
 
 ```

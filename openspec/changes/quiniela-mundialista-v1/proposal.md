@@ -15,6 +15,7 @@ Se necesita una aplicación web para administrar una quiniela del Mundial 2026 e
 - Ranking público sin sesión (URL compartible) que expone únicamente alias, posición y puntos. Usuarios desactivados quedan ocultos.
 - Panel administrativo: gestión de usuarios (consultar, activar, desactivar), CRUD de partidos (fase, fecha, equipos, marcadores), configuración del número de WhatsApp.
 - Seeds: los 72 partidos oficiales de la fase de grupos (archivo estático, sin API deportiva) y la cuenta admin (script con service role key, credenciales por variables de entorno).
+- Banderas de país junto a cada equipo en todos los listados de partidos (códigos ISO en el seed + SVGs locales, sin servicios externos).
 - Modelo de datos preparado para todas las fases del torneo (grupos, dieciseisavos, octavos, cuartos, semifinales, tercer lugar, final); solo grupos habilitada en V1.
 
 ## Capabilities

@@ -4,12 +4,15 @@ import { useActionState } from "react";
 import { saveJornada, type SaveJornadaState } from "./actions";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Chip } from "@/components/ui/chip";
+import { TeamFlag } from "@/components/team-flag";
 import type { Pick } from "@/lib/domain/scoring";
 
 export interface MatchForForm {
   id: number;
   home: string;
   away: string;
+  homeCode: string | null;
+  awayCode: string | null;
   group: string | null;
   time: string;
   pick: Pick | null;
@@ -40,7 +43,7 @@ export function JornadaForm({
       <input type="hidden" name="match_date" value={matchDate} />
       <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
         {matches.map((m) => (
-          <fieldset key={m.id} className="glass m-0 border-0 p-4">
+          <fieldset key={m.id} className="glass group m-0 border-0 p-4">
             <legend className="sr-only">
               {m.home} contra {m.away}
             </legend>
@@ -50,10 +53,16 @@ export function JornadaForm({
                 {m.time} h
               </span>
             </div>
-            <p className="mt-3 mb-4 flex items-baseline justify-between gap-2 text-base font-semibold text-on-surface">
-              <span className="flex-1">{m.home}</span>
+            <p className="mt-3 mb-4 flex items-center justify-between gap-2 text-base font-semibold text-on-surface">
+              <span className="flex flex-1 items-center gap-2">
+                <TeamFlag code={m.homeCode} />
+                {m.home}
+              </span>
               <span className="label-data shrink-0 text-on-surface-variant">vs</span>
-              <span className="flex-1 text-right">{m.away}</span>
+              <span className="flex flex-1 items-center justify-end gap-2 text-right">
+                {m.away}
+                <TeamFlag code={m.awayCode} />
+              </span>
             </p>
             <div
               role="radiogroup"

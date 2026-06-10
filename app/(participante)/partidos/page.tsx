@@ -84,6 +84,8 @@ export default async function PartidosPage() {
                       id: m.id,
                       home: m.home_team,
                       away: m.away_team,
+                      homeCode: m.home_code,
+                      awayCode: m.away_code,
                       group: m.group_label,
                       time: formatKickoffTime(m.kickoff_at),
                       pick: predictions.get(m.id)?.pick ?? null,

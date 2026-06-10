@@ -58,10 +58,24 @@ export function MatchForm({
         defaultValue={match?.home_team ?? ""}
       />
       <Field
+        label="Bandera local (opcional)"
+        name="home_code"
+        maxLength={6}
+        defaultValue={match?.home_code ?? ""}
+        hint="Código ISO en minúsculas: mx, za, gb-eng. Vacío = sin bandera."
+      />
+      <Field
         label="Equipo visitante"
         name="away_team"
         required
         defaultValue={match?.away_team ?? ""}
+      />
+      <Field
+        label="Bandera visitante (opcional)"
+        name="away_code"
+        maxLength={6}
+        defaultValue={match?.away_code ?? ""}
+        hint="Código ISO en minúsculas: mx, za, gb-eng. Vacío = sin bandera."
       />
       <Field
         label="Grupo (opcional)"

@@ -116,6 +116,14 @@ check(
 const radios = user.locator('input[type="radio"]');
 check("selector L/E/V disponible", (await radios.count()) > 0);
 
+// banderas: cada partido muestra la de ambos países (SVG local)
+const flags = user.locator('img[src^="/flags/"]');
+check("banderas visibles en el calendario", (await flags.count()) >= 4);
+check(
+  "bandera de México presente en el partido inaugural",
+  (await user.locator('img[src="/flags/mx.svg"]').count()) >= 1
+);
+
 // elige "L" (gana local) en cada partido de la primera jornada abierta
 const firstForm = user.locator("form", { hasText: "Guardar jornada" }).first();
 const groups = firstForm.locator('[role="radiogroup"]');
@@ -140,6 +148,10 @@ await scoreForm.locator('input[name="away_goals"]').fill("1");
 await scoreForm.getByRole("button", { name: /Guardar|Corregir/ }).click();
 await scoreForm.locator('[role="status"]').waitFor({ timeout: 10000 });
 check("admin captura marcador 2-1", true);
+check(
+  "banderas visibles en la lista del admin",
+  (await admin.locator('img[src^="/flags/"]').count()) >= 4
+);
 await admin.screenshot({ path: `${SHOTS}/07-admin-partidos.png`, fullPage: false });
 
 // ---------- 6. Puntos y ranking ----------

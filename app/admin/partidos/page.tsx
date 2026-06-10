@@ -4,6 +4,7 @@ import { requireAdminPage } from "@/lib/auth/guards";
 import { getJornadas } from "@/lib/queries";
 import { formatJornadaDate, formatKickoffTime } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
+import { TeamFlag } from "@/components/team-flag";
 import { ScoreForm } from "./score-form";
 
 export const metadata: Metadata = { title: "Partidos · Admin" };
@@ -47,8 +48,12 @@ export default async function AdminPartidosPage() {
                   <span className="label-data w-12 shrink-0 text-on-surface-variant">
                     {formatKickoffTime(m.kickoff_at)} h
                   </span>
-                  <span className="min-w-48 flex-1 text-sm font-semibold text-on-surface">
-                    {m.home_team} – {m.away_team}
+                  <span className="flex min-w-48 flex-1 items-center gap-1.5 text-sm font-semibold text-on-surface">
+                    <TeamFlag code={m.home_code} />
+                    {m.home_team}
+                    <span className="text-on-surface-variant">–</span>
+                    <TeamFlag code={m.away_code} />
+                    {m.away_team}
                   </span>
                   {m.home_goals !== null && <Chip tone="secondary">Final</Chip>}
                   <ScoreForm

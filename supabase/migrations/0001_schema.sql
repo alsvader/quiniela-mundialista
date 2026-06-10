@@ -40,6 +40,10 @@ create table public.matches (
   kickoff_at timestamptz not null,
   home_team text not null,
   away_team text not null,
+  -- código de bandera ISO 3166-1 alfa-2 (o regional: gb-eng), nullable:
+  -- las eliminatorias V2 tendrán partidos "por definir" (design.md D10)
+  home_code text,
+  away_code text,
   group_label text,
   home_goals smallint,
   away_goals smallint,

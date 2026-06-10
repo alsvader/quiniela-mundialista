@@ -30,6 +30,9 @@ export interface Match {
   kickoff_at: string;
   home_team: string;
   away_team: string;
+  /** Códigos de bandera ISO 3166-1 alfa-2 (o regional: gb-eng); null = por definir */
+  home_code: string | null;
+  away_code: string | null;
   group_label: string | null;
   home_goals: number | null;
   away_goals: number | null;

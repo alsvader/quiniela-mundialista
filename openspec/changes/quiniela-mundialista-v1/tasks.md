@@ -66,3 +66,12 @@
 - [x] 10.2 Verificar accesos: pendiente/desactivado no guardan (también vía request directa), participante no entra a `/admin`, ranking visible sin sesión
 - [x] 10.3 Auditoría de UI con el skill `impeccable` (audit/polish) sobre los flujos principales: registro, pendiente, pronósticos, ranking público y panel admin; corregir hallazgos
 - [ ] 10.4 Deploy en Vercel con variables de entorno, aplicar migraciones y seeds en Supabase de producción, ejecutar seed de admin y prueba de humo en producción
+
+## 11. Banderas por país (ampliación V1, design.md D10)
+
+- [x] 11.1 Columnas `home_code`/`away_code` (text, nullable) en `matches` — amendar 0001/0002 (aún sin desplegar) y `supabase db reset` local
+- [x] 11.2 Mapa equipo→código ISO en `scripts/generate-fixture-seed.py` (48 equipos, incl. `gb-eng`, `gb-sct`, `cw`) y regenerar el seed con códigos en los 72 partidos
+- [x] 11.3 Assets SVG de banderas (paquete `flag-icons`, solo los necesarios) y componente `TeamFlag` con desaturación-hasta-hover (DESIGN.md) y fallback sin bandera
+- [x] 11.4 Banderas en todos los listados: tarjetas de jornada (form y cerradas), tabla de mis puntos y lista de partidos del admin
+- [x] 11.5 Campos opcionales de código de bandera en el formulario de crear/editar partido del admin
+- [x] 11.6 Verificación: regenerar seed y validar 72×2 códigos, actualizar e2e visual (banderas visibles, fallback sin código) y re-correr tests/build

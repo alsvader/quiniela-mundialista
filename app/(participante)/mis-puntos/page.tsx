@@ -4,6 +4,7 @@ import { getJornadas, getMyPredictions } from "@/lib/queries";
 import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
 import { formatJornadaDate } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
+import { TeamFlag } from "@/components/team-flag";
 
 export const metadata: Metadata = { title: "Mis puntos" };
 
@@ -95,7 +96,13 @@ export default async function MisPuntosPage() {
                           className="border-t border-outline-variant/30 text-on-surface"
                         >
                           <td className="px-4 py-3 font-semibold">
-                            {m.home_team} – {m.away_team}
+                            <span className="inline-flex items-center gap-1.5">
+                              <TeamFlag code={m.home_code} />
+                              {m.home_team}
+                              <span className="text-on-surface-variant">–</span>
+                              <TeamFlag code={m.away_code} />
+                              {m.away_team}
+                            </span>
                           </td>
                           <td className="px-4 py-3 text-center font-mono text-primary-fixed">
                             {m.home_goals}–{m.away_goals}

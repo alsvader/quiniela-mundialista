@@ -100,12 +100,17 @@ export async function upsertMatch(
   const phase = String(formData.get("phase") ?? "");
   const home = String(formData.get("home_team") ?? "").trim();
   const away = String(formData.get("away_team") ?? "").trim();
+  const homeCode = String(formData.get("home_code") ?? "").trim().toLowerCase();
+  const awayCode = String(formData.get("away_code") ?? "").trim().toLowerCase();
   const group = String(formData.get("group_label") ?? "").trim();
   const kickoffLocal = String(formData.get("kickoff_local") ?? "");
 
   if (!PHASES.includes(phase as MatchPhase)) return { error: "Fase inválida." };
   if (home.length < 2 || away.length < 2)
     return { error: "Escribe ambos equipos." };
+  const CODE_RE = /^[a-z]{2}(-[a-z]{2,3})?$/; // iso alfa-2 o regional (gb-eng)
+  if ((homeCode && !CODE_RE.test(homeCode)) || (awayCode && !CODE_RE.test(awayCode)))
+    return { error: "Código de bandera inválido (ej. mx, za, gb-eng) o déjalo vacío." };
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(kickoffLocal))
     return { error: "Fecha y hora inválidas." };
 
@@ -115,6 +120,8 @@ export async function upsertMatch(
     phase,
     home_team: home,
     away_team: away,
+    home_code: homeCode || null,
+    away_code: awayCode || null,
     group_label: group || null,
     kickoff_at: kickoffAt.toISOString(),
     match_date: toMxDate(kickoffAt),
