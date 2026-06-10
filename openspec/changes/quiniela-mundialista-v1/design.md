@@ -112,9 +112,11 @@ Cada equipo lleva su código de bandera en `matches` (`home_code`/`away_code`, t
 
 `bolsa = activos_rol_user × ENTRY_FEE × (1 − PLATFORM_FEE)`. Las constantes ($100 MXN, 30%, 3 premiados) viven en un solo módulo de dominio (`lib/domain/prize.ts`) — cambiarlas para otro torneo es un deploy, consistente con "priorizar simplicidad". El monto nunca se almacena: se deriva del `count` de perfiles activos en cada render, igual que los puntos (D5).
 
-Reparto: 3 partes iguales entre los primeros lugares del ranking. **Desempate resuelto sin criterio externo**: como las partes son iguales, los empates solo importan en el corte de premiados; los empatados en el corte se reparten en partes iguales las porciones de las posiciones que ocupan (ej. 10, 8, 7, 7 pts con $700 → 233.33 / 233.33 / 116.67 / 116.67). Matemática pura sobre el ranking existente: cero datos nuevos, cero disputas de "quién llegó antes".
+Reparto: **ponderado 50/30/20** entre los 3 primeros lugares ($350/$210/$140 con bolsa de $700). **Desempate resuelto sin criterio externo** por posiciones ocupadas: cada grupo de empatados ocupa posiciones consecutivas y se reparte en partes iguales la suma de las porciones de esas posiciones (ej. dos empatados en 1° → ($350+$210)/2 = $280 c/u y el siguiente cobra el 3°; 10,8,7,7 → 350/210/70/70). Monotonía garantizada: cada grupo cobra el promedio de sus porciones y los de abajo solo tocan porciones menores — más puntos nunca paga menos. Con menos de 3 participantes, los porcentajes se renormalizan entre los lugares existentes. Matemática pura sobre el ranking existente: cero datos nuevos, cero disputas de "quién llegó antes".
 
-*Alternativas consideradas:* fecha de registro (determinista pero ajena al futbol); primera fecha de guardado del pronóstico (requiere `created_at` nuevo en `predictions` — el `updated_at` actual cambia con cada edición legítima, castigaría una función que el sistema promueve). Rechazadas.
+Edge aceptado (*minus pool*): un empate que divida la porción de 3° puede pagar menos que el boleto (ej. triple empate en el corte → $46.67 c/u). Es el comportamiento estándar de bolsas compartidas con comisión: el retorno promedio ya es $70 por boleto de $100; todo premio sigue siendo ganancia frente a los $0 del resto.
+
+*Alternativas consideradas:* partes iguales con corte compartido (primera versión de esta decisión — no premia el mérito y su regla de empates resultó difícil de comunicar); equitativo entre todos los premiados (diluye al líder por empates ajenos); piso garantizado de $100 por premiado (un empate abajo reduciría el premio de lugares que no empataron); fecha de registro y primera fecha de guardado como criterios de desempate (ajenos al futbol; la segunda además requería `created_at` nuevo). Rechazadas.
 
 El pago de premios es manual fuera de la app (sin pasarelas, restricción V1); la app solo muestra la bolsa — en `/partidos` junto al encabezado y en `/ranking` (pública: el monto es visible para cualquiera con el link, deseable como gancho al compartir el tablero; el conteo sale de la vista `ranking`, ya legible para anónimos).
 
@@ -141,7 +143,7 @@ Protección por layouts de segmento (`(participante)`, `admin/`) que validan ses
 - **[Errores de huso horario]** El bug más probable del sistema. → Mitigación: `match_date` precalculada en seed como fecha MX; una sola función `isJornadaOpen` con tests unitarios sobre los bordes (23:59:59 vs 00:00:00, horario de verano no aplica en CDMX desde 2022 pero el test lo cubre).
 - **[Alias ofensivos o suplantación en ranking público]** → Mitigación: el admin puede desactivar al usuario (lo saca del ranking); validación básica de longitud/caracteres en registro. Suficiente para un grupo de conocidos.
 - **[Captura errónea de marcadores]** → Mitigación inherente al diseño: todo es derivado; editar los goles recalcula puntos y ranking sin pasos extra.
-- **[Empates en el ranking]** → Resuelto (D11): los empatados comparten posición visible y, en la premiación, se reparten en partes iguales las porciones del corte. Sin criterio externo que disputar.
+- **[Empates en el ranking]** → Resuelto (D11): los empatados comparten posición visible y, en la premiación, se reparten por igual la suma de las porciones ponderadas de las posiciones que ocupan. Sin criterio externo que disputar.
 - **[Un solo admin humano como cuello de botella]** (activaciones y captura de resultados durante el torneo) → Aceptado en V1; el modelo de roles permite más admins en el futuro sin cambios de esquema.
 
 ## Migration Plan

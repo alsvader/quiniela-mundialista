@@ -1,4 +1,8 @@
-import { formatMxn, PRIZE_PLACES } from "@/lib/domain/prize";
+import { formatMxn, PRIZE_WEIGHTS } from "@/lib/domain/prize";
+
+const breakdown = PRIZE_WEIGHTS.map(
+  (w, i) => `${i + 1}° ${Math.round(w * 100)}%`
+).join(" · ");
 
 /** Bolsa acumulada (spec scoring-ranking): monto derivado, mostrado junto al encabezado. */
 export function PrizePoolCard({
@@ -20,9 +24,7 @@ export function PrizePoolCard({
       <span className="font-mono text-2xl font-medium text-tertiary-container [text-shadow:0_0_18px_rgb(189_237_0/0.35)]">
         {formatMxn(pool)}
       </span>
-      <span className="text-xs text-on-surface-variant">
-        para los {PRIZE_PLACES} primeros lugares
-      </span>
+      <span className="text-xs text-on-surface-variant">{breakdown}</span>
     </div>
   );
 }

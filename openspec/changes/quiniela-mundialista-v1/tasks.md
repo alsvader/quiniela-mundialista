@@ -82,3 +82,8 @@
 - [x] 12.2 Conteo de usuarios activos en queries y componente de bolsa en `/partidos`: monto en formato MXN arriba a la derecha, junto al encabezado "Partidos"
 - [x] 12.3 Verificación: tests de dominio, e2e (bolsa visible con el monto derivado del número de activos), lint y build
 - [x] 12.4 Bolsa en la página pública `/ranking`: mismo `PrizePoolCard` bajo el encabezado, antes de la clasificación; check e2e de visibilidad sin sesión
+
+## 13. Reparto ponderado 50/30/20 (revisión de D11)
+
+- [x] 13.1 Reimplementar `prizeDistribution` en `lib/domain/prize.ts`: pesos 50/30/20, grupos de empatados comparten la suma de las porciones de las posiciones que ocupan, renormalización con menos de 3 participantes; reescribir tests con el catálogo completo (sin empates; doble y triple en 1°; cuádruple en 1°; empates en 2°; doble y triple en el corte; todos empatados; 2 participantes; monotonía y suma ≤ bolsa)
+- [x] 13.2 Actualizar el texto del `PrizePoolCard` si aplica (los premios ya no son partes iguales: "1° 50% · 2° 30% · 3° 20%") y verificación completa: tests, e2e, lint y build

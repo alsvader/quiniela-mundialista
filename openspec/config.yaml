@@ -35,11 +35,13 @@ context: |
   8. Auth y negocio son capas separadas: Supabase Auth maneja identidad; el estado
      (pendiente/activo/desactivado), alias, teléfono y rol viven en una tabla de perfiles.
   9. Premiación: bolsa acumulada = usuarios activos × $100 MXN − 30% de comisión
-     (constantes en código), siempre derivada del conteo de activos. Se reparte en
-     partes iguales entre los 3 primeros lugares; en empate en el corte, los
-     empatados comparten esa(s) porción(es) por igual (desempate resuelto sin
-     criterio externo). Visible en /partidos junto al encabezado; el pago de
-     premios es manual fuera de la app.
+     (constantes en código), siempre derivada del conteo de activos. Reparto
+     ponderado 50/30/20 entre los 3 primeros lugares; los empatados comparten por
+     igual la suma de las porciones de las posiciones (consecutivas) que ocupan
+     (desempate resuelto sin criterio externo; más puntos nunca cobra menos).
+     Con menos de 3 participantes los porcentajes se renormalizan. Se acepta el
+     "minus pool": un empate en la porción menor puede pagar menos que el boleto.
+     Visible en /partidos y /ranking; el pago de premios es manual fuera de la app.
 
   Guardado de pronósticos: por jornada completa (todos los partidos del día deben tener
   selección), modificable mientras la jornada esté abierta; se almacena fecha/hora de la

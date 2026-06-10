@@ -48,22 +48,30 @@ El sistema SHALL exponer un ranking accesible sin sesión, mostrando posición, 
 
 #### Scenario: Empate en puntos
 - **WHEN** dos o más participantes tienen los mismos puntos
-- **THEN** comparten posición en el ranking (posición estándar de competencia: 1, 2, 2, 4); para la premiación aplica el reparto con corte compartido definido en "Bolsa acumulada y premiación"
+- **THEN** comparten posición en el ranking (posición estándar de competencia: 1, 2, 2, 4); para la premiación aplica el reparto ponderado por posiciones ocupadas definido en "Bolsa acumulada y premiación"
 
 ### Requirement: Bolsa acumulada y premiación
-El sistema SHALL calcular la bolsa acumulada como: número de usuarios `activos` con rol participante × precio de entrada ($100 MXN) × 70% (el 30% restante es comisión de la plataforma). El monto MUST derivarse siempre del conteo actual de activos, nunca almacenarse. La bolsa se reparte entre los 3 primeros lugares del ranking en partes iguales; si hay empate en el corte de premiados, los empatados se reparten en partes iguales la(s) porción(es) que corresponden a las posiciones que ocupan. El pago de premios se realiza manualmente fuera de la aplicación: la app solo muestra los montos.
+El sistema SHALL calcular la bolsa acumulada como: número de usuarios `activos` con rol participante × precio de entrada ($100 MXN) × 70% (el 30% restante es comisión de la plataforma). El monto MUST derivarse siempre del conteo actual de activos, nunca almacenarse. La bolsa se reparte ponderada entre los 3 primeros lugares del ranking: 50% al 1°, 30% al 2° y 20% al 3°. En caso de empate, los empatados se reparten en partes iguales la suma de las porciones de las posiciones (consecutivas) que ocupan. Si hay menos de 3 participantes, los porcentajes se renormalizan entre los lugares existentes. Se acepta que un premiado pueda cobrar menos que su boleto cuando un empate divide la porción menor (comportamiento estándar de bolsas compartidas). El pago de premios se realiza manualmente fuera de la aplicación: la app solo muestra los montos.
 
 #### Scenario: Cálculo de la bolsa
 - **WHEN** hay 10 usuarios activos con rol participante
-- **THEN** la bolsa acumulada es $700 MXN (10 × $100 − 30%) y cada uno de los 3 primeros lugares corresponde a $233.33
+- **THEN** la bolsa acumulada es $700 MXN (10 × $100 − 30%) y los premios son $350 (1°), $210 (2°) y $140 (3°)
 
 #### Scenario: La activación actualiza la bolsa
 - **WHEN** el administrador activa un usuario adicional
 - **THEN** la bolsa mostrada refleja el nuevo total en la siguiente consulta, sin intervención manual
 
+#### Scenario: Empate en primero absorbe las porciones que ocupa
+- **WHEN** el ranking termina 10, 10 y 8 puntos con bolsa de $700
+- **THEN** los dos empatados en primero se reparten 1° + 2° ($350 + $210 = $280 cada uno) y el de 8 puntos recibe el premio de 3° ($140); más puntos nunca cobra menos
+
+#### Scenario: Empate triple en primero
+- **WHEN** el ranking termina 10, 10, 10 y 8 puntos con bolsa de $700
+- **THEN** los tres empatados ocupan las posiciones 1-3 y se reparten toda la bolsa ($233.33 cada uno); el de 8 puntos no recibe premio
+
 #### Scenario: Empate en el corte de premiados
 - **WHEN** el ranking termina 10, 8, 7 y 7 puntos con bolsa de $700
-- **THEN** el 1° y el 2° reciben $233.33 cada uno, y los dos empatados en el corte se reparten la parte del 3er lugar: $116.67 cada uno
+- **THEN** el 1° recibe $350, el 2° $210, y los dos empatados en el corte se reparten el premio de 3°: $70 cada uno
 
 #### Scenario: Bolsa visible en partidos
 - **WHEN** un usuario autenticado consulta la página de partidos

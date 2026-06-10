@@ -97,8 +97,9 @@ async function readPool(page) {
   const text = await page
     .locator("text=Bolsa acumulada")
     .locator("..")
+    .locator(".font-mono")
     .textContent();
-  return Number((text?.match(/\$\s?([\d,]+)/)?.[1] ?? "").replace(/,/g, ""));
+  return Number((text?.match(/([\d,]+)/)?.[1] ?? "").replace(/,/g, ""));
 }
 const poolBefore = await readPool(user);
 check("bolsa acumulada visible junto al encabezado", Number.isFinite(poolBefore));
