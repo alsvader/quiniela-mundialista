@@ -2,22 +2,22 @@
 
 ## 1. Fundación del proyecto
 
-- [ ] 1.1 Inicializar app Next.js (App Router) con TypeScript y Tailwind CSS; repositorio git
+- [x] 1.1 Inicializar app Next.js (App Router) con TypeScript y Tailwind CSS; repositorio git
 - [ ] 1.2 Crear proyecto Supabase y configurar variables de entorno locales (`.env.local` + `.env.example` con URL, anon key, service role key, ADMIN_EMAIL, ADMIN_PASSWORD)
-- [ ] 1.3 Configurar clientes de Supabase para servidor (Server Components/Actions) y navegador, con manejo de sesión por cookies (`@supabase/ssr`)
-- [ ] 1.4 Integrar sistema de diseño: DESIGN.md (export de Google Stitch) y PRODUCT.md en la raíz; mapear tokens de DESIGN.md a la configuración de Tailwind
+- [x] 1.3 Configurar clientes de Supabase para servidor (Server Components/Actions) y navegador, con manejo de sesión por cookies (`@supabase/ssr`)
+- [x] 1.4 Integrar sistema de diseño: DESIGN.md (export de Google Stitch) y PRODUCT.md en la raíz; mapear tokens de DESIGN.md a la configuración de Tailwind
 
 ## 2. Esquema de base de datos y RLS
 
-- [ ] 2.1 Migración: enums (`user_status`, `user_role`, `match_phase` con las 7 fases, `pick`) y tablas `profiles`, `matches`, `predictions` (PK compuesta user_id+match_id, `updated_at`), `app_settings`
-- [ ] 2.2 Restricciones: alias único, FK `profiles.id` → `auth.users.id`, goles no negativos y capturados en pareja (ambos o ninguno)
-- [ ] 2.3 Políticas RLS: `profiles` (propio + admin), `predictions` (dueño + admin), `matches` (lectura pública, escritura admin), `app_settings` (lectura pública del número, escritura admin)
+- [x] 2.1 Migración: enums (`user_status`, `user_role`, `match_phase` con las 7 fases, `pick`) y tablas `profiles`, `matches`, `predictions` (PK compuesta user_id+match_id, `updated_at`), `app_settings`
+- [x] 2.2 Restricciones: alias único, FK `profiles.id` → `auth.users.id`, goles no negativos y capturados en pareja (ambos o ninguno)
+- [x] 2.3 Políticas RLS: `profiles` (propio + admin), `predictions` (dueño + admin), `matches` (lectura pública, escritura admin), `app_settings` (lectura pública del número, escritura admin)
 
 ## 3. Lógica de dominio (server-only, con tests)
 
-- [ ] 3.1 Función `isJornadaOpen(matchDate, now)` con zona America/Mexico_City y tests unitarios de bordes (23:59:59 abierta, 00:00:00 cerrada)
-- [ ] 3.2 Funciones de derivación: resultado oficial desde goles y punto (0/1) desde pronóstico vs resultado, con tests
-- [ ] 3.3 Helpers de autorización: `requireSession`, `requireActiveUser`, `requireAdmin` (validan contra `profiles` en servidor)
+- [x] 3.1 Función `isJornadaOpen(matchDate, now)` con zona America/Mexico_City y tests unitarios de bordes (23:59:59 abierta, 00:00:00 cerrada)
+- [x] 3.2 Funciones de derivación: resultado oficial desde goles y punto (0/1) desde pronóstico vs resultado, con tests
+- [x] 3.3 Helpers de autorización: `requireSession`, `requireActiveUser`, `requireAdmin` (validan contra `profiles` en servidor)
 
 ## 4. Seeds
 

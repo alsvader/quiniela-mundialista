@@ -1,26 +1,205 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Tokens del sistema de diseño "Retro-Futurist Sports System".
+ * Fuente de verdad: DESIGN.md (formato Google Stitch). No inventar valores aquí.
+ */
+@theme {
+  /* Superficies (deep space) */
+  --color-surface: #1a0b2e;
+  --color-surface-dim: #1a0b2e;
+  --color-surface-bright: #413256;
+  --color-surface-container-lowest: #150628;
+  --color-surface-container-low: #231436;
+  --color-surface-container: #27183b;
+  --color-surface-container-high: #322346;
+  --color-surface-container-highest: #3d2e51;
+  --color-surface-variant: #3d2e51;
+  --color-on-surface: #eddcff;
+  --color-on-surface-variant: #b9cacb;
+  --color-inverse-surface: #eddcff;
+  --color-inverse-on-surface: #38294d;
+  --color-outline: #849495;
+  --color-outline-variant: #3a494b;
+  --color-surface-tint: #00dce6;
+  --color-background: #1a0b2e;
+  --color-on-background: #eddcff;
+
+  /* Primario (cian eléctrico) */
+  --color-primary: #e3fdff;
+  --color-on-primary: #00373a;
+  --color-primary-container: #00f3ff;
+  --color-on-primary-container: #006b71;
+  --color-inverse-primary: #00696f;
+  --color-primary-fixed: #6ff6ff;
+  --color-primary-fixed-dim: #00dce6;
+  --color-on-primary-fixed: #002022;
+  --color-on-primary-fixed-variant: #004f53;
+
+  /* Secundario (magenta vibrante) */
+  --color-secondary: #fface8;
+  --color-on-secondary: #5e0053;
+  --color-secondary-container: #ff24e4;
+  --color-on-secondary-container: #520049;
+  --color-secondary-fixed: #ffd7f0;
+  --color-secondary-fixed-dim: #fface8;
+  --color-on-secondary-fixed: #3a0033;
+  --color-on-secondary-fixed-variant: #840076;
+
+  /* Terciario (lima: éxito, aciertos) */
+  --color-tertiary: #f1ffc2;
+  --color-on-tertiary: #283500;
+  --color-tertiary-container: #bded00;
+  --color-on-tertiary-container: #526800;
+  --color-tertiary-fixed: #c3f400;
+  --color-tertiary-fixed-dim: #abd600;
+  --color-on-tertiary-fixed: #161e00;
+  --color-on-tertiary-fixed-variant: #3c4d00;
+
+  /* Error */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  /* Tipografía (cargada vía next/font en app/layout.tsx) */
+  --font-display: var(--font-anybody), system-ui, sans-serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Radios: perfil "Soft (Level 1)" */
+  --radius-sm: 0.125rem;
+  --radius-DEFAULT: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Glow en lugar de sombra negra */
+  --shadow-glow-primary: 0 0 15px rgb(0 243 255 / 0.4);
+  --shadow-glow-secondary: 0 0 15px rgb(255 36 228 / 0.35);
+  --shadow-glow-tertiary: 0 0 15px rgb(189 237 0 / 0.35);
+
+  /* Easing (ease-out exponencial, transiciones de estado 150-250ms) */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Escala z semántica */
+@theme {
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-modal-backdrop: 30;
+  --z-modal: 40;
+  --z-toast: 50;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    font-family: var(--font-sans);
+    /* Atmósfera: gradiente espacial profundo + rejilla cian al 5% */
+    background-image:
+      radial-gradient(
+        ellipse 80% 60% at 50% -10%,
+        rgb(65 50 86 / 0.55),
+        transparent 70%
+      ),
+      linear-gradient(rgb(0 220 230 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(0 220 230 / 0.05) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      40px 40px,
+      40px 40px;
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--color-primary-container);
+    color: var(--color-on-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-container);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /*
+   * Superficie de vidrio (DESIGN.md · Elevation & Depth):
+   * fondo translúcido + blur + borde degradado "scanning" cian→transparente.
+   */
+  .glass {
+    position: relative;
+    border-radius: var(--radius-xl);
+    background-color: rgb(61 46 81 / 0.22);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgb(0 243 255 / 0.45),
+      rgb(0 243 255 / 0.08) 40%,
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Heading de sección: Anybody pesada con slant (DESIGN.md · Typography) */
+  .heading-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  /* Etiqueta de dato: marcadores, horas, contadores (JetBrains Mono) */
+  .label-data {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
 }
