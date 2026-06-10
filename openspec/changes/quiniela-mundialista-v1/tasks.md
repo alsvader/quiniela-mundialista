@@ -27,38 +27,38 @@
 
 ## 5. Autenticación y registro
 
-- [ ] 5.1 Página de registro: email, contraseña, nombre completo, alias (obligatorio, único), teléfono; crea cuenta Auth + perfil `pendiente`
-- [ ] 5.2 Página de login y logout; manejo de errores con mensajes genéricos
-- [ ] 5.3 Redirección raíz según sesión/rol (sin sesión → login; participante → partidos; admin → panel)
+- [x] 5.1 Página de registro: email, contraseña, nombre completo, alias (obligatorio, único), teléfono; crea cuenta Auth + perfil `pendiente`
+- [x] 5.2 Página de login y logout; manejo de errores con mensajes genéricos
+- [x] 5.3 Redirección raíz según sesión/rol (sin sesión → login; participante → partidos; admin → panel)
 
 ## 6. Flujo de cuenta pendiente
 
-- [ ] 6.1 Banner persistente para usuarios `pendientes` con advertencia explícita de pérdida de jornadas cerradas y fecha límite de la próxima jornada
-- [ ] 6.2 Modal informativo al iniciar sesión para usuarios `pendientes`
-- [ ] 6.3 Botón de contacto WhatsApp: deep link `wa.me` al número de `app_settings` con mensaje prellenado (nombre, correo, teléfono)
-- [ ] 6.4 Estado `desactivado`: mismo bloqueo de guardado con mensaje propio de cuenta desactivada
+- [x] 6.1 Banner persistente para usuarios `pendientes` con advertencia explícita de pérdida de jornadas cerradas y fecha límite de la próxima jornada
+- [x] 6.2 Modal informativo al iniciar sesión para usuarios `pendientes`
+- [x] 6.3 Botón de contacto WhatsApp: deep link `wa.me` al número de `app_settings` con mensaje prellenado (nombre, correo, teléfono)
+- [x] 6.4 Estado `desactivado`: mismo bloqueo de guardado con mensaje propio de cuenta desactivada
 
 ## 7. Calendario y pronósticos
 
-- [ ] 7.1 Página de partidos: jornadas agrupadas por `match_date`, partidos con equipos, grupo y hora; indicador de jornada abierta/cerrada
-- [ ] 7.2 UI de selección L/E/V por partido (solo interactiva para usuarios `activos` en jornadas abiertas; solo lectura en caso contrario)
-- [ ] 7.3 Server Action de guardado por jornada completa: valida sesión, estado `activo`, jornada abierta y cobertura total de partidos del día; upsert en bloque con `updated_at`
-- [ ] 7.4 Mostrar pronósticos guardados, fecha/hora de última modificación y errores de validación (jornada incompleta, cerrada, cuenta no activa)
+- [x] 7.1 Página de partidos: jornadas agrupadas por `match_date`, partidos con equipos, grupo y hora; indicador de jornada abierta/cerrada
+- [x] 7.2 UI de selección L/E/V por partido (solo interactiva para usuarios `activos` en jornadas abiertas; solo lectura en caso contrario)
+- [x] 7.3 Server Action de guardado por jornada completa: valida sesión, estado `activo`, jornada abierta y cobertura total de partidos del día; upsert en bloque con `updated_at`
+- [x] 7.4 Mostrar pronósticos guardados, fecha/hora de última modificación y errores de validación (jornada incompleta, cerrada, cuenta no activa)
 
 ## 8. Puntuación y ranking
 
-- [ ] 8.1 Query de ranking: puntos calculados al vuelo (pick vs resultado derivado de goles), solo usuarios `activos` rol participante, orden descendente
-- [ ] 8.2 Página pública `/ranking` (sin sesión): posición, alias, puntos
-- [ ] 8.3 Página "mis puntos": total acumulado y detalle por partido (pronóstico, marcador, resultado oficial, punto 1/0)
+- [x] 8.1 Query de ranking: puntos calculados al vuelo (pick vs resultado derivado de goles), solo usuarios `activos` rol participante, orden descendente
+- [x] 8.2 Página pública `/ranking` (sin sesión): posición, alias, puntos
+- [x] 8.3 Página "mis puntos": total acumulado y detalle por partido (pronóstico, marcador, resultado oficial, punto 1/0)
 
 ## 9. Panel administrativo
 
-- [ ] 9.1 Layout `/admin` protegido por rol en servidor (segmento + verificación en cada action)
-- [ ] 9.2 Usuarios: lista con nombre, alias, correo, teléfono, estado y fecha de registro; acciones activar/desactivar
-- [ ] 9.3 Partidos: lista con captura/corrección de marcadores (goles local/visitante)
-- [ ] 9.4 Partidos: crear y editar (fase, fecha, hora, equipos)
-- [ ] 9.5 Configuración: ver y actualizar número de WhatsApp
-- [ ] 9.6 Ranking: vista de la clasificación desde el panel
+- [x] 9.1 Layout `/admin` protegido por rol en servidor (segmento + verificación en cada action)
+- [x] 9.2 Usuarios: lista con nombre, alias, correo, teléfono, estado y fecha de registro; acciones activar/desactivar
+- [x] 9.3 Partidos: lista con captura/corrección de marcadores (goles local/visitante)
+- [x] 9.4 Partidos: crear y editar (fase, fecha, hora, equipos)
+- [x] 9.5 Configuración: ver y actualizar número de WhatsApp
+- [x] 9.6 Ranking: vista de la clasificación desde el panel
 
 ## 10. Verificación y despliegue
 
