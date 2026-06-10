@@ -26,6 +26,11 @@ decisiones de producto/stack en `openspec/config.yaml`.
 ## Reglas técnicas
 
 - Next.js App Router + TypeScript + Tailwind; Supabase (Auth + Postgres); Vercel.
+- Al escribir o revisar código Next.js, aplicar el skill `next-best-practices`
+  (.agents/skills/next-best-practices): convenciones de archivos, fronteras RSC,
+  APIs asíncronas, metadata, optimización y el rename middleware→proxy de v16.
+- Validación schema-first con zod en la frontera de cada Server Action
+  (lib/schemas.ts); ver openspec design.md D12.
 - Server Components para lectura, Server Actions para mutaciones; lógica de negocio
   y autorización SIEMPRE en servidor (la UI nunca es la única defensa).
 - Zona horaria canónica: America/Mexico_City (jornadas y cierres).
