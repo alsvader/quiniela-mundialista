@@ -66,7 +66,7 @@ export default async function PartidosPage() {
           return (
             <section key={date} aria-label={`Jornada del ${formatJornadaDate(date)}`}>
               <header className="mb-4 flex flex-wrap items-center gap-3">
-                <h2 className="heading-display text-lg capitalize sm:text-xl">
+                <h2 className="heading-display text-lg sm:text-xl">
                   {formatJornadaDate(date)}
                 </h2>
                 {open ? (

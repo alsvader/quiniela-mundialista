@@ -23,9 +23,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat("es-MX", {
   hour12: false,
 });
 
-/** "jueves 11 de junio" a partir de una fecha de jornada YYYY-MM-DD. */
+/** "Jueves, 11 de junio" a partir de una fecha de jornada YYYY-MM-DD. */
 export function formatJornadaDate(matchDate: string): string {
-  return dayFormatter.format(new Date(`${matchDate}T12:00:00-06:00`));
+  const s = dayFormatter.format(new Date(`${matchDate}T12:00:00-06:00`));
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** "19:00" hora CDMX de un kickoff. */

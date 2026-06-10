@@ -65,11 +65,14 @@ export default async function ParticipanteLayout({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-5 py-3">
           <Link
             href="/partidos"
-            className="heading-display text-base text-on-surface no-underline"
+            className="heading-display shrink-0 text-base text-on-surface no-underline"
           >
-            Quiniela <span className="text-primary-fixed-dim">Mundialista</span>
+            Quiniela{" "}
+            <span className="text-primary-fixed-dim max-sm:hidden">
+              Mundialista
+            </span>
           </Link>
-          <nav className="flex items-center gap-1">
+          <nav className="flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap">
             <Link href="/partidos" className={navLink}>
               Partidos
             </Link>

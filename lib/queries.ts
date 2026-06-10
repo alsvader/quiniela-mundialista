@@ -23,7 +23,15 @@ export async function getJornadas(): Promise<Map<string, Match[]>> {
 /** Pronósticos del usuario autenticado, indexados por match_id. */
 export async function getMyPredictions(): Promise<Map<number, Prediction>> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("predictions").select("*");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return new Map();
+  // El filtro explícito importa: RLS deja al admin ver TODOS los pronósticos.
+  const { data, error } = await supabase
+    .from("predictions")
+    .select("*")
+    .eq("user_id", user.id);
   if (error) throw new Error(`Error cargando pronósticos: ${error.message}`);
   return new Map(((data ?? []) as Prediction[]).map((p) => [p.match_id, p]));
 }

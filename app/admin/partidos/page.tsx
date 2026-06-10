@@ -32,7 +32,7 @@ export default async function AdminPartidosPage() {
       <div className="mt-8 flex flex-col gap-10">
         {[...jornadas.entries()].map(([date, matches]) => (
           <section key={date}>
-            <h2 className="heading-display mb-3 text-lg capitalize">
+            <h2 className="heading-display mb-3 text-lg">
               {formatJornadaDate(date)}
             </h2>
             <ul className="flex list-none flex-col gap-2 p-0">

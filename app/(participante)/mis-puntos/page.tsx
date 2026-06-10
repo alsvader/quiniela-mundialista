@@ -65,7 +65,7 @@ export default async function MisPuntosPage() {
           return (
             <section key={date}>
               <header className="mb-3 flex flex-wrap items-center gap-3">
-                <h2 className="heading-display text-lg capitalize">
+                <h2 className="heading-display text-lg">
                   {formatJornadaDate(date)}
                 </h2>
                 <Chip tone="primary">
