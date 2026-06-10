@@ -93,3 +93,10 @@
 - [x] 14.1 Instalar zod y crear `lib/schemas.ts`: schemas con normalización (transforms) y tipos inferidos para registro/completar perfil (campos compartidos), guardado de jornada (fecha + picks H|D|A), marcador, partido (fase, equipos, códigos de bandera, kickoff), estado de usuario y número de WhatsApp
 - [x] 14.2 Migrar las 7 Server Actions a `safeParse` con `fieldErrors` derivados del schema, eliminando las validaciones manuales duplicadas; conservar mensajes y comportamiento observable (mismos escenarios de spec)
 - [x] 14.3 Verificación de no-regresión: tests de dominio, e2e completo (24 checks), lint y build
+
+## 15. Superficies de error y carga (hallazgos de next-best-practices)
+
+- [x] 15.1 `app/error.tsx` y `app/global-error.tsx` (client components; global-error con html/body autocontenido) en español y con el sistema de diseño, con botón de reintento
+- [x] 15.2 `app/not-found.tsx` con estética Cyber-Stadium y enlaces a inicio y ranking (cubre también el `notFound()` de /admin/partidos/[id])
+- [x] 15.3 `loading.tsx` con skeletons glass (pulse) para los segmentos `(participante)` y `admin`
+- [x] 15.4 Verificación: check e2e de la 404 personalizada y suite completa (tests, e2e, lint, build)

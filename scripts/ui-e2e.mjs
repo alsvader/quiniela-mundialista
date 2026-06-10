@@ -191,6 +191,13 @@ check(
 );
 await publicPage.screenshot({ path: `${SHOTS}/09-ranking-publico.png`, fullPage: false });
 
+// ---------- 6b. 404 personalizada ----------
+await publicPage.goto(`${BASE}/esta-ruta-no-existe`);
+check(
+  "404 personalizada con el sistema de diseño",
+  /Fuera de juego/.test(await publicPage.content())
+);
+
 // ---------- 7. Acceso: participante no entra a /admin ----------
 await user.goto(`${BASE}/admin/usuarios`);
 await user.waitForURL("**/partidos", { timeout: 15000 });
