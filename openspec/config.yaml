@@ -1,0 +1,51 @@
+schema: spec-driven
+
+context: |
+  Producto: Quiniela del Mundial 2026 (fase de grupos en V1; estructura preparada
+  para dieciseisavos, octavos, cuartos, semifinales, tercer lugar y final).
+
+  Tech stack:
+  - Next.js (App Router) + TypeScript + Tailwind CSS
+  - Supabase Auth (email y contraseña) y Supabase PostgreSQL
+  - Despliegue en Vercel
+  - Monolito: funcionalidad de usuario y admin en la misma app
+  - Server Components siempre que sea posible; Server Actions para mutaciones
+  - Lógica de negocio en el servidor; priorizar simplicidad; evitar abstracciones innecesarias
+  - WhatsApp deep links para contactar al admin; sin APIs deportivas, sin pasarelas de pago
+  - Sin tiempo real ni subida de archivos en V1
+
+  Decisiones de producto cerradas:
+  1. Zona horaria canónica America/Mexico_City para agrupar jornadas (partidos por día)
+     y para el cierre de pronósticos (23:59 del día anterior a la jornada).
+  2. Usuario pendiente de pago: puede iniciar sesión y consultar partidos, pero NO puede
+     guardar pronósticos hasta que el admin lo active. Jornadas cerradas antes de la
+     activación se pierden sin recurso; el banner/modal debe advertirlo explícitamente.
+  3. Puntuación: se compara únicamente el resultado L/E/V (derivado automáticamente de
+     los goles que captura el admin) contra el pronóstico L/E/V del usuario. Acierto = 1
+     punto, error = 0. Los goles nunca participan en la comparación. Totales y ranking se
+     calculan siempre al vuelo (nunca se almacenan); corregir un marcador recalcula todo.
+  4. Ranking público sin sesión (URL compartible). El registro pide alias obligatorio y
+     es el único dato expuesto públicamente; nombre/correo/teléfono solo los ve el admin.
+  5. Usuario desactivado: oculto del ranking y sin poder guardar pronósticos; sus datos
+     se conservan intactos y la desactivación es reversible.
+  6. Fixture: seed con los 72 partidos oficiales de fase de grupos (archivo estático).
+     El CRUD de partidos del admin queda para correcciones y para eliminatorias en V2.
+  7. Cuenta admin: creada por seed/script usando la service role key de Supabase, con
+     credenciales en variables de entorno; el rol admin vive en la tabla de perfiles.
+  8. Auth y negocio son capas separadas: Supabase Auth maneja identidad; el estado
+     (pendiente/activo/desactivado), alias, teléfono y rol viven en una tabla de perfiles.
+  9. Criterio de desempate: pendiente a propósito, fuera de V1.
+
+  Guardado de pronósticos: por jornada completa (todos los partidos del día deben tener
+  selección), modificable mientras la jornada esté abierta; se almacena fecha/hora de la
+  última modificación.
+
+  Fuera de alcance V1: pagos automáticos, notificaciones push, correos automáticos,
+  APIs deportivas, estadísticas avanzadas, marcador exacto, bonificaciones, premios,
+  eliminatorias habilitadas.
+
+  Flujo de UI: las tareas de interfaz DEBEN usar el skill `impeccable` (diseño e
+  implementación visual) y `ui-ux-pro-max` (patrones, paletas, tipografía, UX
+  guidelines), ambos instalados en .claude/skills/. El sistema de diseño generado
+  con Google Stitch vive en DESIGN.md (raíz, formato Stitch) y es la fuente de
+  verdad visual; PRODUCT.md define registro y personalidad. Ver CLAUDE.md.
