@@ -87,3 +87,9 @@
 
 - [x] 13.1 Reimplementar `prizeDistribution` en `lib/domain/prize.ts`: pesos 50/30/20, grupos de empatados comparten la suma de las porciones de las posiciones que ocupan, renormalización con menos de 3 participantes; reescribir tests con el catálogo completo (sin empates; doble y triple en 1°; cuádruple en 1°; empates en 2°; doble y triple en el corte; todos empatados; 2 participantes; monotonía y suma ≤ bolsa)
 - [x] 13.2 Actualizar el texto del `PrizePoolCard` si aplica (los premios ya no son partes iguales: "1° 50% · 2° 30% · 3° 20%") y verificación completa: tests, e2e, lint y build
+
+## 14. Validación schema-first con zod (design.md D12)
+
+- [x] 14.1 Instalar zod y crear `lib/schemas.ts`: schemas con normalización (transforms) y tipos inferidos para registro/completar perfil (campos compartidos), guardado de jornada (fecha + picks H|D|A), marcador, partido (fase, equipos, códigos de bandera, kickoff), estado de usuario y número de WhatsApp
+- [x] 14.2 Migrar las 7 Server Actions a `safeParse` con `fieldErrors` derivados del schema, eliminando las validaciones manuales duplicadas; conservar mensajes y comportamiento observable (mismos escenarios de spec)
+- [x] 14.3 Verificación de no-regresión: tests de dominio, e2e completo (24 checks), lint y build

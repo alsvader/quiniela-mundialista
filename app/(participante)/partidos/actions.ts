@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { AuthorizationError, requireActiveUser } from "@/lib/auth/guards";
 import { isJornadaOpen } from "@/lib/domain/jornada";
+import { jornadaDateSchema, pickSchema } from "@/lib/schemas";
 import type { Match } from "@/lib/types";
 
 export type SaveJornadaState = {
@@ -11,8 +12,6 @@ export type SaveJornadaState = {
   error?: string;
   missing?: string[];
 };
-
-const VALID_PICKS = new Set(["H", "D", "A"]);
 
 /**
  * Guarda la jornada completa (spec predictions): exige cuenta activa, jornada
@@ -31,9 +30,9 @@ export async function saveJornada(
     throw e;
   }
 
-  const matchDate = String(formData.get("match_date") ?? "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(matchDate))
-    return { error: "Jornada inválida." };
+  const parsedDate = jornadaDateSchema.safeParse(formData.get("match_date"));
+  if (!parsedDate.success) return { error: "Jornada inválida." };
+  const matchDate = parsedDate.data;
 
   if (!isJornadaOpen(matchDate))
     return {
@@ -54,12 +53,17 @@ export async function saveJornada(
   const now = new Date().toISOString();
 
   for (const match of matches as Pick<Match, "id" | "home_team" | "away_team">[]) {
-    const pick = String(formData.get(`pick-${match.id}`) ?? "");
-    if (!VALID_PICKS.has(pick)) {
+    const pick = pickSchema.safeParse(formData.get(`pick-${match.id}`));
+    if (!pick.success) {
       missing.push(`${match.home_team} vs ${match.away_team}`);
       continue;
     }
-    rows.push({ user_id: user.id, match_id: match.id, pick, updated_at: now });
+    rows.push({
+      user_id: user.id,
+      match_id: match.id,
+      pick: pick.data,
+      updated_at: now,
+    });
   }
 
   if (missing.length)

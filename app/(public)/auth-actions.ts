@@ -2,40 +2,22 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import {
+  fieldErrorsOf,
+  profileFieldsSchema,
+  signInSchema,
+  signUpSchema,
+} from "@/lib/schemas";
 
 export type AuthState = { error?: string; fieldErrors?: Record<string, string> };
-
-const ALIAS_RE = /^[A-Za-z0-9_.-]{3,20}$/;
-
-function validateProfileFields(formData: FormData) {
-  const fullName = String(formData.get("full_name") ?? "").trim();
-  const alias = String(formData.get("alias") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const fieldErrors: Record<string, string> = {};
-
-  if (fullName.length < 3) fieldErrors.full_name = "Escribe tu nombre completo.";
-  if (!ALIAS_RE.test(alias))
-    fieldErrors.alias =
-      "De 3 a 20 caracteres: letras, números, punto, guion o guion bajo.";
-  if (!/^\d{10}$/.test(phone.replace(/\D/g, "")))
-    fieldErrors.phone = "Escribe un teléfono de 10 dígitos.";
-
-  return { fullName, alias, phone: phone.replace(/\D/g, ""), fieldErrors };
-}
 
 export async function signUp(
   _prev: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
-  const { fullName, alias, phone, fieldErrors } = validateProfileFields(formData);
-
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
-    fieldErrors.email = "Escribe un correo válido.";
-  if (password.length < 8)
-    fieldErrors.password = "Mínimo 8 caracteres.";
-  if (Object.keys(fieldErrors).length) return { fieldErrors };
+  const parsed = signUpSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { fieldErrors: fieldErrorsOf(parsed.error) };
+  const { email, password, full_name, alias, phone } = parsed.data;
 
   const supabase = await createClient();
 
@@ -55,7 +37,7 @@ export async function signUp(
 
   const { error: profileError } = await supabase.from("profiles").insert({
     id: data.user.id,
-    full_name: fullName,
+    full_name,
     alias,
     phone,
   });
@@ -75,8 +57,8 @@ export async function completeProfile(
   _prev: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const { fullName, alias, phone, fieldErrors } = validateProfileFields(formData);
-  if (Object.keys(fieldErrors).length) return { fieldErrors };
+  const parsed = profileFieldsSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { fieldErrors: fieldErrorsOf(parsed.error) };
 
   const supabase = await createClient();
   const {
@@ -86,9 +68,7 @@ export async function completeProfile(
 
   const { error } = await supabase.from("profiles").insert({
     id: user.id,
-    full_name: fullName,
-    alias,
-    phone,
+    ...parsed.data,
   });
   if (error) {
     if (error.code === "23505")
@@ -103,11 +83,11 @@ export async function signIn(
   _prev: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
+  const parsed = signInSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Correo o contraseña incorrectos." };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "Correo o contraseña incorrectos." };
 
   redirect("/");

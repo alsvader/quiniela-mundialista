@@ -122,6 +122,14 @@ El pago de premios es manual fuera de la app (sin pasarelas, restricción V1); l
 
 Edge aceptado: desactivar a un usuario que ya pagó reduce la bolsa mostrada (el conteo es de activos *actuales*). En un grupo de conocidos la desactivación es excepcional; si ocurre, el admin reactiva o ajusta expectativas por WhatsApp.
 
+### D12 — Validación schema-first con zod (server-only)
+
+Toda entrada del cliente cruza tres capas: (1) **schemas zod** en la frontera de cada Server Action — única fuente de verdad declarativa por payload, `safeParse` con `fieldErrors` derivados y tipos TS inferidos con `z.infer`, incluyendo normalización (trim, lowercase de email, strip de no-dígitos en teléfonos) como `transform`s del schema; (2) **parametrización de la plataforma** — supabase-js/PostgREST parametriza todas las queries, no existe SQL crudo en el repo; (3) **RLS + CHECK constraints** en Postgres como última línea real. El XSS lo neutraliza React escapando toda interpolación (prohibido `dangerouslySetInnerHTML`); los deep links usan `encodeURIComponent`.
+
+Alcance V1: zod solo en servidor (cero impacto en bundle); los formularios cliente conservan la validación HTML nativa (required, pattern, minLength) como primera retroalimentación. Compartir schemas con el cliente queda como opción para la ronda 2.
+
+*Alternativa considerada:* validación manual imperativa por action (lo construido inicialmente — funciona y está probada, pero dispersa reglas duplicables, desconecta los tipos TS del runtime y cada action inventa su formato de error). Migrada a zod con la suite de tests y e2e como red de seguridad.
+
 ### D9 — Estructura de rutas
 
 ```

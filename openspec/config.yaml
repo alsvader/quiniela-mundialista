@@ -11,6 +11,9 @@ context: |
   - Monolito: funcionalidad de usuario y admin en la misma app
   - Server Components siempre que sea posible; Server Actions para mutaciones
   - Lógica de negocio en el servidor; priorizar simplicidad; evitar abstracciones innecesarias
+  - Validación schema-first con zod en la frontera de cada Server Action (server-only,
+    safeParse + tipos inferidos + normalización como transforms); RLS y CHECK
+    constraints como última línea; nunca dangerouslySetInnerHTML
   - WhatsApp deep links para contactar al admin; sin APIs deportivas, sin pasarelas de pago
   - Sin tiempo real ni subida de archivos en V1
 
