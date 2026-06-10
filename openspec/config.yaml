@@ -34,7 +34,12 @@ context: |
      credenciales en variables de entorno; el rol admin vive en la tabla de perfiles.
   8. Auth y negocio son capas separadas: Supabase Auth maneja identidad; el estado
      (pendiente/activo/desactivado), alias, teléfono y rol viven en una tabla de perfiles.
-  9. Criterio de desempate: pendiente a propósito, fuera de V1.
+  9. Premiación: bolsa acumulada = usuarios activos × $100 MXN − 30% de comisión
+     (constantes en código), siempre derivada del conteo de activos. Se reparte en
+     partes iguales entre los 3 primeros lugares; en empate en el corte, los
+     empatados comparten esa(s) porción(es) por igual (desempate resuelto sin
+     criterio externo). Visible en /partidos junto al encabezado; el pago de
+     premios es manual fuera de la app.
 
   Guardado de pronósticos: por jornada completa (todos los partidos del día deben tener
   selección), modificable mientras la jornada esté abierta; se almacena fecha/hora de la

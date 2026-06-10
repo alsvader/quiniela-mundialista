@@ -57,3 +57,18 @@ export async function getRanking(): Promise<RankingRow[]> {
   if (error) throw new Error(`Error cargando ranking: ${error.message}`);
   return (data ?? []) as RankingRow[];
 }
+
+/**
+ * Número de participantes activos (base de la bolsa, design.md D11).
+ * Se cuenta sobre la vista `ranking` (security definer): expone exactamente
+ * a los activos con rol participante y es legible para cualquier sesión,
+ * a diferencia de `profiles` que RLS restringe a propio + admin.
+ */
+export async function getActiveParticipantCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("ranking")
+    .select("*", { count: "exact", head: true });
+  if (error) throw new Error(`Error contando activos: ${error.message}`);
+  return count ?? 0;
+}

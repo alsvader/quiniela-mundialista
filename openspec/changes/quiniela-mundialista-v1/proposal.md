@@ -16,6 +16,7 @@ Se necesita una aplicación web para administrar una quiniela del Mundial 2026 e
 - Panel administrativo: gestión de usuarios (consultar, activar, desactivar), CRUD de partidos (fase, fecha, equipos, marcadores), configuración del número de WhatsApp.
 - Seeds: los 72 partidos oficiales de la fase de grupos (archivo estático, sin API deportiva) y la cuenta admin (script con service role key, credenciales por variables de entorno).
 - Banderas de país junto a cada equipo en todos los listados de partidos (códigos ISO en el seed + SVGs locales, sin servicios externos).
+- Bolsa acumulada visible en la página de partidos: activos × $100 − 30% de comisión, derivada del conteo de usuarios activos; se reparte en partes iguales entre los 3 primeros, con corte compartido en caso de empate. El pago de premios sigue siendo manual fuera de la app.
 - Modelo de datos preparado para todas las fases del torneo (grupos, dieciseisavos, octavos, cuartos, semifinales, tercer lugar, final); solo grupos habilitada en V1.
 
 ## Capabilities
@@ -39,4 +40,4 @@ Se necesita una aplicación web para administrar una quiniela del Mundial 2026 e
 - Repositorio vacío: todo el código, esquema de base de datos, migraciones y seeds son nuevos.
 - Servicios externos: proyecto de Supabase (Auth + PostgreSQL) y proyecto de Vercel por crear; variables de entorno para credenciales de Supabase y del admin.
 - Sin integraciones de pago, deportivas, correo ni push (fuera de alcance V1).
-- Criterio de desempate del ranking: pendiente a propósito, se definirá en una versión posterior sin cambios estructurales.
+- Criterio de desempate: resuelto — reparto con corte compartido entre empatados (ver design.md D11); no requiere datos nuevos.

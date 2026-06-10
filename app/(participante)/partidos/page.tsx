@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireSession } from "@/lib/auth/guards";
-import { getJornadas, getMyPredictions, getWhatsappNumber } from "@/lib/queries";
+import {
+  getActiveParticipantCount,
+  getJornadas,
+  getMyPredictions,
+  getWhatsappNumber,
+} from "@/lib/queries";
 import { isJornadaOpen } from "@/lib/domain/jornada";
+import { prizePool } from "@/lib/domain/prize";
+import { PrizePoolCard } from "@/components/prize-pool-card";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import {
   formatDeadline,
@@ -19,9 +26,10 @@ export const metadata: Metadata = { title: "Partidos" };
 
 export default async function PartidosPage() {
   const { user, profile } = await requireSession();
-  const [jornadas, predictions] = await Promise.all([
+  const [jornadas, predictions, activeCount] = await Promise.all([
     getJornadas(),
     getMyPredictions(),
+    getActiveParticipantCount(),
   ]);
 
   const canEdit = profile.status === "active";
@@ -47,12 +55,17 @@ export default async function PartidosPage() {
   return (
     <>
       {modal}
-      <h1 className="heading-display text-3xl sm:text-4xl">Partidos</h1>
-      <p className="mt-2 max-w-prose text-sm text-on-surface-variant">
-        Pronostica el resultado de cada partido: local (L), empate (E) o
-        visitante (V). Cada jornada cierra a las 23:59 del día anterior y se
-        guarda completa.
-      </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+        <div>
+          <h1 className="heading-display text-3xl sm:text-4xl">Partidos</h1>
+          <p className="mt-2 max-w-prose text-sm text-on-surface-variant">
+            Pronostica el resultado de cada partido: local (L), empate (E) o
+            visitante (V). Cada jornada cierra a las 23:59 del día anterior y
+            se guarda completa.
+          </p>
+        </div>
+        <PrizePoolCard pool={prizePool(activeCount)} />
+      </header>
 
       <div className="mt-8 flex flex-col gap-12">
         {[...jornadas.entries()].map(([date, matches]) => {

@@ -108,6 +108,18 @@ Cada equipo lleva su código de bandera en `matches` (`home_code`/`away_code`, t
 
 *Alternativa considerada:* emoji de bandera (cero assets). Rechazada: en Windows/Chrome se renderiza como letras planas ("MX") y el estilo varía por plataforma — contradice el objetivo visual.
 
+### D11 — Bolsa acumulada: derivada, con corte compartido
+
+`bolsa = activos_rol_user × ENTRY_FEE × (1 − PLATFORM_FEE)`. Las constantes ($100 MXN, 30%, 3 premiados) viven en un solo módulo de dominio (`lib/domain/prize.ts`) — cambiarlas para otro torneo es un deploy, consistente con "priorizar simplicidad". El monto nunca se almacena: se deriva del `count` de perfiles activos en cada render, igual que los puntos (D5).
+
+Reparto: 3 partes iguales entre los primeros lugares del ranking. **Desempate resuelto sin criterio externo**: como las partes son iguales, los empates solo importan en el corte de premiados; los empatados en el corte se reparten en partes iguales las porciones de las posiciones que ocupan (ej. 10, 8, 7, 7 pts con $700 → 233.33 / 233.33 / 116.67 / 116.67). Matemática pura sobre el ranking existente: cero datos nuevos, cero disputas de "quién llegó antes".
+
+*Alternativas consideradas:* fecha de registro (determinista pero ajena al futbol); primera fecha de guardado del pronóstico (requiere `created_at` nuevo en `predictions` — el `updated_at` actual cambia con cada edición legítima, castigaría una función que el sistema promueve). Rechazadas.
+
+El pago de premios es manual fuera de la app (sin pasarelas, restricción V1); la app solo muestra la bolsa — en `/partidos`, junto al encabezado.
+
+Edge aceptado: desactivar a un usuario que ya pagó reduce la bolsa mostrada (el conteo es de activos *actuales*). En un grupo de conocidos la desactivación es excepcional; si ocurre, el admin reactiva o ajusta expectativas por WhatsApp.
+
 ### D9 — Estructura de rutas
 
 ```
@@ -129,7 +141,7 @@ Protección por layouts de segmento (`(participante)`, `admin/`) que validan ses
 - **[Errores de huso horario]** El bug más probable del sistema. → Mitigación: `match_date` precalculada en seed como fecha MX; una sola función `isJornadaOpen` con tests unitarios sobre los bordes (23:59:59 vs 00:00:00, horario de verano no aplica en CDMX desde 2022 pero el test lo cubre).
 - **[Alias ofensivos o suplantación en ranking público]** → Mitigación: el admin puede desactivar al usuario (lo saca del ranking); validación básica de longitud/caracteres en registro. Suficiente para un grupo de conocidos.
 - **[Captura errónea de marcadores]** → Mitigación inherente al diseño: todo es derivado; editar los goles recalcula puntos y ranking sin pasos extra.
-- **[Empates en el ranking sin criterio definido]** → Aceptado: orden indefinido entre empatados en V1 (se muestra misma puntuación); el desempate se define después sin cambio estructural.
+- **[Empates en el ranking]** → Resuelto (D11): los empatados comparten posición visible y, en la premiación, se reparten en partes iguales las porciones del corte. Sin criterio externo que disputar.
 - **[Un solo admin humano como cuello de botella]** (activaciones y captura de resultados durante el torneo) → Aceptado en V1; el modelo de roles permite más admins en el futuro sin cambios de esquema.
 
 ## Migration Plan
@@ -138,5 +150,5 @@ Proyecto nuevo: sin migración de datos. Orden de despliegue: crear proyecto Sup
 
 ## Open Questions
 
-- Criterio de desempate del ranking (explícitamente pospuesto a V1.1).
+- ~~Criterio de desempate del ranking~~ — resuelto en D11: reparto con corte compartido.
 - Texto/idioma final de la UI (se asume español).

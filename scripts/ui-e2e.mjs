@@ -92,6 +92,16 @@ check(
   "pendiente ve partidos en solo lectura (sin selector L/E/V)",
   (await user.locator('input[type="radio"]').count()) === 0
 );
+
+async function readPool(page) {
+  const text = await page
+    .locator("text=Bolsa acumulada")
+    .locator("..")
+    .textContent();
+  return Number((text?.match(/\$\s?([\d,]+)/)?.[1] ?? "").replace(/,/g, ""));
+}
+const poolBefore = await readPool(user);
+check("bolsa acumulada visible junto al encabezado", Number.isFinite(poolBefore));
 await user.screenshot({ path: `${SHOTS}/03-partidos-pendiente.png`, fullPage: false });
 
 // ---------- 3. Admin activa por la UI ----------
@@ -105,6 +115,11 @@ check("admin activa al usuario desde la tabla", true);
 
 // ---------- 4. Usuario activo pronostica la jornada ----------
 await user.reload();
+const poolAfter = await readPool(user);
+check(
+  `bolsa sube $70 al activar (de $${poolBefore} a $${poolAfter})`,
+  poolAfter === poolBefore + 70
+);
 check(
   "banner desaparece al activarse",
   !(await user
