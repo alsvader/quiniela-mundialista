@@ -21,9 +21,9 @@
 
 ## 4. Seeds
 
-- [ ] 4.1 Archivo estático del fixture: 72 partidos de fase de grupos del Mundial 2026 (equipos, grupo, kickoff UTC, `match_date` precalculada en America/Mexico_City) y script/migración de carga
-- [ ] 4.2 Script idempotente de creación del admin (Auth + perfil rol `admin` estado `activo`) usando service role key y variables de entorno
-- [ ] 4.3 Verificación del seed: conteo de 72 partidos, fechas de jornada correctas en días limítrofes de huso horario
+- [x] 4.1 Archivo estático del fixture: 72 partidos de fase de grupos del Mundial 2026 (equipos, grupo, kickoff UTC, `match_date` precalculada en America/Mexico_City) y script/migración de carga
+- [x] 4.2 Script idempotente de creación del admin (Auth + perfil rol `admin` estado `activo`) usando service role key y variables de entorno
+- [x] 4.3 Verificación del seed: conteo de 72 partidos, fechas de jornada correctas en días limítrofes de huso horario
 
 ## 5. Autenticación y registro
 
