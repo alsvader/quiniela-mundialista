@@ -183,6 +183,11 @@ check(
   "con 1 punto",
   /1\s*PTS/i.test((await rankRow.textContent()) ?? "")
 );
+const publicPool = await readPool(publicPage);
+check(
+  `bolsa visible en ranking público sin sesión y coincide ($${publicPool})`,
+  publicPool === poolAfter
+);
 await publicPage.screenshot({ path: `${SHOTS}/09-ranking-publico.png`, fullPage: false });
 
 // ---------- 7. Acceso: participante no entra a /admin ----------

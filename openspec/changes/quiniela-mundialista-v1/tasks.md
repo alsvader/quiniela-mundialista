@@ -81,3 +81,4 @@
 - [x] 12.1 Módulo `lib/domain/prize.ts`: constantes (entrada $100 MXN, comisión 30%, 3 premiados), cálculo de bolsa desde conteo de activos y reparto con corte compartido; tests (bolsa de 10 activos = $700; caso 10,8,7,7 → 233.33/233.33/116.67/116.67; menos premiados que participantes)
 - [x] 12.2 Conteo de usuarios activos en queries y componente de bolsa en `/partidos`: monto en formato MXN arriba a la derecha, junto al encabezado "Partidos"
 - [x] 12.3 Verificación: tests de dominio, e2e (bolsa visible con el monto derivado del número de activos), lint y build
+- [x] 12.4 Bolsa en la página pública `/ranking`: mismo `PrizePoolCard` bajo el encabezado, antes de la clasificación; check e2e de visibilidad sin sesión

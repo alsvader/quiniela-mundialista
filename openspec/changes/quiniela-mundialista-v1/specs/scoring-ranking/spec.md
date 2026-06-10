@@ -69,6 +69,10 @@ El sistema SHALL calcular la bolsa acumulada como: número de usuarios `activos`
 - **WHEN** un usuario autenticado consulta la página de partidos
 - **THEN** ve la bolsa acumulada vigente en la parte superior, al lado derecho del encabezado "Partidos", en formato de pesos mexicanos
 
+#### Scenario: Bolsa visible en el ranking público
+- **WHEN** cualquier visitante (con o sin sesión) consulta la página pública de ranking
+- **THEN** ve la misma bolsa acumulada vigente, bajo el encabezado y antes de la clasificación, en formato de pesos mexicanos
+
 ### Requirement: Detalle de puntos del participante
 El usuario autenticado SHALL poder consultar su total de puntos acumulados y el detalle por partido (pronóstico, marcador final, resultado oficial, punto obtenido).
 

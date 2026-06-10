@@ -116,7 +116,7 @@ Reparto: 3 partes iguales entre los primeros lugares del ranking. **Desempate re
 
 *Alternativas consideradas:* fecha de registro (determinista pero ajena al futbol); primera fecha de guardado del pronóstico (requiere `created_at` nuevo en `predictions` — el `updated_at` actual cambia con cada edición legítima, castigaría una función que el sistema promueve). Rechazadas.
 
-El pago de premios es manual fuera de la app (sin pasarelas, restricción V1); la app solo muestra la bolsa — en `/partidos`, junto al encabezado.
+El pago de premios es manual fuera de la app (sin pasarelas, restricción V1); la app solo muestra la bolsa — en `/partidos` junto al encabezado y en `/ranking` (pública: el monto es visible para cualquiera con el link, deseable como gancho al compartir el tablero; el conteo sale de la vista `ranking`, ya legible para anónimos).
 
 Edge aceptado: desactivar a un usuario que ya pagó reduce la bolsa mostrada (el conteo es de activos *actuales*). En un grupo de conocidos la desactivación es excepcional; si ocurre, el admin reactiva o ajusta expectativas por WhatsApp.
 

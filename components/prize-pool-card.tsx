@@ -1,9 +1,19 @@
 import { formatMxn, PRIZE_PLACES } from "@/lib/domain/prize";
 
 /** Bolsa acumulada (spec scoring-ranking): monto derivado, mostrado junto al encabezado. */
-export function PrizePoolCard({ pool }: { pool: number }) {
+export function PrizePoolCard({
+  pool,
+  align = "end",
+}: {
+  pool: number;
+  align?: "end" | "center";
+}) {
   return (
-    <div className="glass flex flex-col items-end gap-0.5 px-5 py-3">
+    <div
+      className={`glass flex flex-col gap-0.5 px-5 py-3 ${
+        align === "center" ? "items-center" : "items-end"
+      }`}
+    >
       <span className="label-data text-on-surface-variant">
         Bolsa acumulada
       </span>
