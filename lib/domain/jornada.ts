@@ -9,6 +9,16 @@
 
 export const TIMEZONE = "America/Mexico_City";
 
+/**
+ * Excepciones fechadas a la regla general de cierre (spec match-schedule).
+ * DEBE coincidir con is_match_open() en supabase/migrations/0004_*.sql.
+ * Jornada inaugural 2026: abierta hasta una hora antes del primer kickoff.
+ * Inerte después de su fecha; se conserva como registro de la decisión.
+ */
+export const JORNADA_DEADLINE_EXCEPTIONS: Record<string, string> = {
+  "2026-06-11": "2026-06-11T12:00:00-06:00",
+};
+
 const mxDateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: TIMEZONE,
   year: "numeric",
@@ -23,14 +33,16 @@ export function toMxDate(instant: Date): string {
 
 /**
  * ¿La jornada de `matchDate` (YYYY-MM-DD, fecha CDMX) sigue abierta en `now`?
- * Abierta hasta las 23:59:59 CDMX del día anterior; cerrada desde las 00:00:00
- * del día de la jornada.
+ * Regla general: abierta hasta las 23:59:59 CDMX del día anterior; cerrada
+ * desde las 00:00:00 del día de la jornada. Las jornadas con excepción
+ * fechada cierran en el instante de su excepción.
  */
 export function isJornadaOpen(matchDate: string, now: Date = new Date()): boolean {
-  return toMxDate(now) < matchDate;
+  return now.getTime() < jornadaDeadline(matchDate).getTime();
 }
 
-/** Instante exacto del cierre: medianoche CDMX del día de la jornada (UTC-6, sin DST desde 2022). */
+/** Instante exacto del cierre (CDMX es UTC-6 fijo, sin DST desde 2022). */
 export function jornadaDeadline(matchDate: string): Date {
-  return new Date(`${matchDate}T00:00:00-06:00`);
+  const exception = JORNADA_DEADLINE_EXCEPTIONS[matchDate];
+  return new Date(exception ?? `${matchDate}T00:00:00-06:00`);
 }

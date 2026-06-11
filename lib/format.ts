@@ -1,4 +1,4 @@
-import { TIMEZONE } from "@/lib/domain/jornada";
+import { jornadaDeadline, TIMEZONE } from "@/lib/domain/jornada";
 
 const dayFormatter = new Intl.DateTimeFormat("es-MX", {
   timeZone: TIMEZONE,
@@ -39,14 +39,22 @@ export function formatDateTime(iso: string | Date): string {
   return dateTimeFormatter.format(typeof iso === "string" ? new Date(iso) : iso);
 }
 
-/** Fecha límite legible de una jornada: el día anterior a las 23:59. */
+/**
+ * Fecha límite legible de una jornada, derivada del deadline real.
+ * Regla general (medianoche): "10 de junio a las 23:59" (el día anterior).
+ * Excepciones fechadas: el instante exacto, ej. "11 de junio a las 12:00".
+ */
 export function formatDeadline(matchDate: string): string {
-  const previous = new Date(`${matchDate}T12:00:00-06:00`);
-  previous.setUTCDate(previous.getUTCDate() - 1);
-  const day = new Intl.DateTimeFormat("es-MX", {
+  const deadline = jornadaDeadline(matchDate);
+  const dayFmt = new Intl.DateTimeFormat("es-MX", {
     timeZone: TIMEZONE,
     day: "numeric",
     month: "long",
-  }).format(previous);
-  return `${day} a las 23:59`;
+  });
+  const isMidnight = timeFormatter.format(deadline) === "00:00";
+  if (isMidnight) {
+    const previous = new Date(deadline.getTime() - 60_000); // 23:59 del día anterior
+    return `${dayFmt.format(previous)} a las 23:59`;
+  }
+  return `${dayFmt.format(deadline)} a las ${timeFormatter.format(deadline)}`;
 }

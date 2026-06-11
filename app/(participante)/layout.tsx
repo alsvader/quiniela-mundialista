@@ -5,21 +5,18 @@ import { buildWhatsappLink } from "@/lib/whatsapp";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(public)/auth-actions";
 import { PendingBanner } from "./pending-banner";
-import { TIMEZONE } from "@/lib/domain/jornada";
+import { isJornadaOpen } from "@/lib/domain/jornada";
 
 async function nextOpenJornada(): Promise<string | null> {
   const supabase = await createClient();
-  const todayMx = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIMEZONE,
-  }).format(new Date());
+  // isJornadaOpen y no `match_date > hoy`: las excepciones fechadas (jornada
+  // inaugural) mantienen abierta una jornada cuyo día ya llegó
   const { data } = await supabase
     .from("matches")
     .select("match_date")
-    .gt("match_date", todayMx)
-    .order("match_date", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  return data?.match_date ?? null;
+    .order("match_date", { ascending: true });
+  const dates = [...new Set((data ?? []).map((m) => m.match_date as string))];
+  return dates.find((d) => isJornadaOpen(d)) ?? null;
 }
 
 export default async function ParticipanteLayout({

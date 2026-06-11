@@ -11,9 +11,9 @@ describe("isJornadaOpen", () => {
     expect(isJornadaOpen(JORNADA, now)).toBe(true);
   });
 
-  it("está cerrada exactamente a las 00:00:00 CDMX del día de la jornada", () => {
-    const now = new Date("2026-06-11T06:00:00Z"); // 11 jun 00:00:00 CDMX
-    expect(isJornadaOpen(JORNADA, now)).toBe(false);
+  it("está cerrada exactamente a las 00:00:00 CDMX del día de la jornada (regla general, jornada del 12)", () => {
+    const now = new Date("2026-06-12T06:00:00Z"); // 12 jun 00:00:00 CDMX
+    expect(isJornadaOpen("2026-06-12", now)).toBe(false);
   });
 
   it("está abierta varios días antes", () => {
@@ -34,9 +34,33 @@ describe("isJornadaOpen", () => {
 });
 
 describe("jornadaDeadline", () => {
-  it("el cierre es la medianoche CDMX del día de la jornada", () => {
-    expect(jornadaDeadline(JORNADA).toISOString()).toBe(
-      "2026-06-11T06:00:00.000Z"
+  it("el cierre general es la medianoche CDMX del día de la jornada", () => {
+    // la jornada del 12 sigue la regla general (la del 11 tiene excepción)
+    expect(jornadaDeadline("2026-06-12").toISOString()).toBe(
+      "2026-06-12T06:00:00.000Z"
     );
+  });
+});
+
+describe("excepción de la jornada inaugural (2026-06-11)", () => {
+  it("sigue abierta a las 11:59:59 CDMX del 11 de junio", () => {
+    const now = new Date("2026-06-11T17:59:59Z"); // 11:59:59 CDMX
+    expect(isJornadaOpen(JORNADA, now)).toBe(true);
+  });
+
+  it("cierra exactamente a las 12:00:00 CDMX del 11 de junio", () => {
+    const now = new Date("2026-06-11T18:00:00Z"); // 12:00:00 CDMX
+    expect(isJornadaOpen(JORNADA, now)).toBe(false);
+  });
+
+  it("su deadline es el 11 de junio a las 12:00 CDMX", () => {
+    expect(jornadaDeadline(JORNADA).toISOString()).toBe(
+      "2026-06-11T18:00:00.000Z"
+    );
+  });
+
+  it("las demás jornadas no cambian: la del 12 cierra el 11 a las 23:59:59", () => {
+    expect(isJornadaOpen("2026-06-12", new Date("2026-06-12T05:59:59Z"))).toBe(true);
+    expect(isJornadaOpen("2026-06-12", new Date("2026-06-12T06:00:00Z"))).toBe(false);
   });
 });
