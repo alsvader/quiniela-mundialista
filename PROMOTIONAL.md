@@ -329,6 +329,87 @@ Notas:
 
 ---
 
+## 6. Flyer "Cómo guardar tus pronósticos" — 9:16 con capturas reales
+
+Flyer de instrucciones para historias (Instagram/WhatsApp) con el flujo de
+pronóstico por jornada. Mensaje central del producto: capturar la jornada
+completa toma menos de un minuto.
+
+Capturas en `promotional/`:
+
+| Archivo | Contenido |
+|---|---|
+| `flyer-08-jornada-elegida.png` | Jornada abierta con "L" y "V" elegidos y botón "Guardar jornada" |
+| `flyer-09-jornada-guardada.png` | Confirmación "✓ Jornada guardada" junto al botón |
+
+**Cómo usarlo en ChatGPT (1 sola generación):** adjunta
+`flyer-08-jornada-elegida.png` y `flyer-09-jornada-guardada.png` al mensaje
+junto con este prompt:
+
+```
+Design a vertical 9:16 instructional flyer for Instagram/WhatsApp stories for
+"Quiniela Mundialista 2026", a private World Cup prediction game. Premium
+retro-futurist "cyber-stadium" aesthetic with modern glassmorphism —
+sophisticated and restrained, NOT kitschy 80s synthwave.
+
+BACKGROUND: deep dark violet-purple (#1a0b2e) with a subtle cyan perspective
+grid at very low opacity (5%) and a soft volumetric purple gradient, like a
+dark high-tech stadium.
+
+HEADLINE at the top (in Spanish), bold italic condensed heavy extended
+sans-serif (style of the "Anybody" typeface), white, tight letter spacing:
+"PRONOSTICA EN UN MINUTO". Small subtitle below: "Así guardas tu jornada".
+
+CONTENT: a vertical sequence of 4 numbered steps. Each step is a frosted-glass
+card (semi-transparent, blurred, 1px luminous cyan gradient border, 12px
+rounded corners, soft cyan glow instead of black shadows) with a glowing
+cyan (#00f3ff) number chip and short Spanish text:
+
+1. "Entra con tu cuenta" — text-only card with a small cyan user icon.
+2. "Elige L, E o V en cada partido" — place the FIRST attached screenshot
+   (match list with the lime green selected buttons) inside a slim glowing
+   phone frame next to this step. Add a tiny legend in mono-spaced font:
+   "L GANA LOCAL · E EMPATE · V GANA VISITANTE".
+3. "Toca Guardar jornada" — place the SECOND attached screenshot (the one
+   with the lime "✓ Jornada guardada" confirmation) next to this step, with
+   the caption: "la jornada se guarda completa".
+4. "¿Cambiaste de opinión? Corrige las veces que quieras antes del cierre"
+   — text-only card with a small cyan clock icon and the mono-spaced label
+   "CIERRE: 23:59 DEL DÍA ANTERIOR (CDMX)".
+
+IMPORTANT: reproduce the two attached screenshots as faithfully as possible
+inside their phone frames — do not redesign them, do not change their colors
+or layout; they show the real app UI.
+
+COLOR DISCIPLINE: dominant deep purple; electric cyan as main accent, lime
+green (#bded00) only for selected predictions and the saved confirmation;
+magenta (#ff24e4) at most once as a small highlight. High-contrast white text.
+
+FOOTER: a tiny mono-spaced chip near the bottom: "SI NO GUARDAS ANTES DEL
+CIERRE, LA JORNADA SE PIERDE".
+
+SAFE ZONES: no text or key elements in the top 15% or bottom 15% of the
+canvas (the stories UI covers those zones).
+
+AVOID: FIFA logos or the official trophy, real team crests, betting-odds
+clutter, scanlines, VHS grain, corporate blue, light backgrounds.
+```
+
+Notas:
+
+- El chip de estado en las capturas dice "CIERRA 11 DE JUNIO A LAS 12:00"
+  porque la jornada inaugural tiene excepción de cierre extendido (change
+  `extender-cierre-jornada-inaugural`); la regla general que comunica el
+  flyer sigue siendo 23:59 del día anterior.
+- Igual que el flyer de activación: si el texto de las capturas sale con
+  erratas, pide los marcos de teléfono vacíos y monta las capturas reales
+  encima con Canva/Figma.
+- Para regenerar las capturas: el flujo vive en `scripts/flyer-shots.mjs`
+  (activación) y este par salió de un script equivalente que registra una
+  usuaria, la activa por service role, elige L/V y guarda la jornada.
+
+---
+
 ## Prompts de seguimiento (misma conversación de ChatGPT)
 
 Si ya generaste una versión y quieres otro formato sin repetir todo:
