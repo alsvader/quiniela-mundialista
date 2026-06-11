@@ -65,7 +65,7 @@
 - [x] 10.1 Prueba de flujo completo en local: registro → pendiente (banner/modal/WhatsApp) → activación → pronóstico de jornada → cierre → captura de marcador → puntos y ranking → corrección de marcador recalcula
 - [x] 10.2 Verificar accesos: pendiente/desactivado no guardan (también vía request directa), participante no entra a `/admin`, ranking visible sin sesión
 - [x] 10.3 Auditoría de UI con el skill `impeccable` (audit/polish) sobre los flujos principales: registro, pendiente, pronósticos, ranking público y panel admin; corregir hallazgos
-- [ ] 10.4 Deploy en Vercel con variables de entorno, aplicar migraciones y seeds en Supabase de producción, ejecutar seed de admin y prueba de humo en producción
+- [x] 10.4 Deploy en Vercel con variables de entorno, aplicar migraciones y seeds en Supabase de producción, ejecutar seed de admin y prueba de humo en producción
 
 ## 11. Banderas por país (ampliación V1, design.md D10)
 
