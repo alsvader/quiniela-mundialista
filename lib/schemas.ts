@@ -62,9 +62,10 @@ export const signInSchema = z.object({
 
 export const pickSchema = z.enum(["H", "D", "A"]);
 
-export const jornadaDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Jornada inválida.");
+export const matchIdSchema = z.coerce
+  .number("Partido inválido.")
+  .int("Partido inválido.")
+  .positive("Partido inválido.");
 
 // ---------- admin ----------
 

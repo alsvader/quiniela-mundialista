@@ -1,15 +1,16 @@
-import { formatDeadline, formatJornadaDate } from "@/lib/format";
+import { formatDeadline } from "@/lib/format";
 
 /**
  * Banner persistente de pago pendiente (spec account-activation).
- * Advierte explícitamente la pérdida de jornadas cerradas y la fecha límite.
+ * Advierte explícitamente la pérdida de partidos cerrados y el próximo cierre
+ * (kickoff − 1h del siguiente partido abierto).
  */
 export function PendingBanner({
   whatsappLink,
-  nextJornada,
+  nextKickoff,
 }: {
   whatsappLink: string | null;
-  nextJornada: string | null;
+  nextKickoff: string | null;
 }) {
   return (
     <div
@@ -22,16 +23,16 @@ export function PendingBanner({
             Tu cuenta está pendiente de pago.
           </span>{" "}
           No puedes guardar pronósticos todavía
-          {nextJornada ? (
+          {nextKickoff ? (
             <>
               {" "}
-              — actívala antes del{" "}
+              — el próximo partido cierra el{" "}
               <strong className="text-on-surface">
-                {formatDeadline(nextJornada)}
-              </strong>{" "}
-              o perderás la jornada del {formatJornadaDate(nextJornada)}.{" "}
+                {formatDeadline(nextKickoff)}
+              </strong>
+              ; actívala antes para no perderlo.{" "}
               <span className="text-on-surface-variant">
-                Las jornadas que cierren antes de tu activación se pierden sin
+                Los partidos que cierren antes de tu activación se pierden sin
                 recurso.
               </span>
             </>

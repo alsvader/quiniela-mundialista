@@ -19,9 +19,11 @@ context: |
 
   Decisiones de producto cerradas:
   1. Zona horaria canónica America/Mexico_City para agrupar jornadas (partidos por día)
-     y para el cierre de pronósticos (23:59 del día anterior a la jornada).
+     y para mostrar horarios. Cierre de pronósticos POR PARTIDO: cada partido acepta
+     pronósticos hasta una hora antes de su kickoff (change cierre-por-partido,
+     2026-06-11; sustituye al cierre por jornada a las 23:59 del día anterior).
   2. Usuario pendiente de pago: puede iniciar sesión y consultar partidos, pero NO puede
-     guardar pronósticos hasta que el admin lo active. Jornadas cerradas antes de la
+     guardar pronósticos hasta que el admin lo active. Partidos cerrados antes de la
      activación se pierden sin recurso; el banner/modal debe advertirlo explícitamente.
   3. Puntuación: se compara únicamente el resultado L/E/V (derivado automáticamente de
      los goles que captura el admin) contra el pronóstico L/E/V del usuario. Acierto = 1
@@ -46,9 +48,10 @@ context: |
      "minus pool": un empate en la porción menor puede pagar menos que el boleto.
      Visible en /partidos y /ranking; el pago de premios es manual fuera de la app.
 
-  Guardado de pronósticos: por jornada completa (todos los partidos del día deben tener
-  selección), modificable mientras la jornada esté abierta; se almacena fecha/hora de la
-  última modificación.
+  Guardado de pronósticos: por partido individual (cada partido tiene su propia acción
+  de guardar), modificable mientras el partido esté abierto; se almacena fecha/hora de
+  la última modificación por pronóstico. Es deliberado que un partido tardío pueda
+  pronosticarse después de iniciado el primero de la jornada.
 
   Fuera de alcance V1: pagos automáticos, notificaciones push, correos automáticos,
   APIs deportivas, estadísticas avanzadas, marcador exacto, bonificaciones, premios,

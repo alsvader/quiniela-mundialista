@@ -2,26 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { AuthorizationError, requireActiveUser } from "@/lib/auth/guards";
-import { isJornadaOpen } from "@/lib/domain/jornada";
-import { jornadaDateSchema, pickSchema } from "@/lib/schemas";
-import type { Match } from "@/lib/types";
+import { isMatchOpen } from "@/lib/domain/jornada";
+import { matchIdSchema, pickSchema } from "@/lib/schemas";
+import type { Pick } from "@/lib/domain/scoring";
 
-export type SaveJornadaState = {
+export type SavePickState = {
   ok?: boolean;
   savedAt?: string;
+  /** Eco del pick guardado: la UI lo usa para detectar cambios sin guardar. */
+  savedPick?: Pick;
   error?: string;
-  missing?: string[];
 };
 
 /**
- * Guarda la jornada completa (spec predictions): exige cuenta activa, jornada
- * abierta y un pick por CADA partido del día. Upsert idempotente; RLS es la
- * segunda línea de defensa.
+ * Guarda el pronóstico de UN partido (spec predictions, guardado por partido):
+ * exige cuenta activa y partido abierto (kickoff − 1h, spec match-schedule).
+ * Upsert idempotente de una fila; RLS es la segunda línea de defensa.
  */
-export async function saveJornada(
-  _prev: SaveJornadaState,
+export async function savePick(
+  _prev: SavePickState,
   formData: FormData
-): Promise<SaveJornadaState> {
+): Promise<SavePickState> {
   let session;
   try {
     session = await requireActiveUser();
@@ -30,56 +31,41 @@ export async function saveJornada(
     throw e;
   }
 
-  const parsedDate = jornadaDateSchema.safeParse(formData.get("match_date"));
-  if (!parsedDate.success) return { error: "Jornada inválida." };
-  const matchDate = parsedDate.data;
-
-  if (!isJornadaOpen(matchDate))
-    return {
-      error:
-        "Esta jornada ya cerró (23:59 del día anterior). Tus pronósticos quedaron como estaban.",
-    };
+  const parsedId = matchIdSchema.safeParse(formData.get("match_id"));
+  if (!parsedId.success) return { error: "Partido inválido." };
+  const parsedPick = pickSchema.safeParse(formData.get("pick"));
+  if (!parsedPick.success)
+    return { error: "Elige local, empate o visitante antes de guardar." };
 
   const { supabase, user } = session;
-  const { data: matches, error: matchesError } = await supabase
+  const { data: match, error: matchError } = await supabase
     .from("matches")
-    .select("id, home_team, away_team")
-    .eq("match_date", matchDate);
-  if (matchesError || !matches?.length)
-    return { error: "No se pudieron cargar los partidos de la jornada." };
+    .select("id, kickoff_at")
+    .eq("id", parsedId.data)
+    .maybeSingle<{ id: number; kickoff_at: string }>();
+  if (matchError || !match)
+    return { error: "No se pudo cargar el partido. Intenta de nuevo." };
 
-  const missing: string[] = [];
-  const rows: { user_id: string; match_id: number; pick: string; updated_at: string }[] = [];
-  const now = new Date().toISOString();
-
-  for (const match of matches as Pick<Match, "id" | "home_team" | "away_team">[]) {
-    const pick = pickSchema.safeParse(formData.get(`pick-${match.id}`));
-    if (!pick.success) {
-      missing.push(`${match.home_team} vs ${match.away_team}`);
-      continue;
-    }
-    rows.push({
-      user_id: user.id,
-      match_id: match.id,
-      pick: pick.data,
-      updated_at: now,
-    });
-  }
-
-  if (missing.length)
+  if (!isMatchOpen(match.kickoff_at))
     return {
-      error: "Para guardar la jornada, pronostica todos sus partidos. Falta:",
-      missing,
+      error:
+        "Este partido ya cerró (una hora antes del inicio). Tu pronóstico quedó como estaba.",
     };
 
-  const { error: upsertError } = await supabase.from("predictions").upsert(rows);
+  const now = new Date().toISOString();
+  const { error: upsertError } = await supabase.from("predictions").upsert({
+    user_id: user.id,
+    match_id: match.id,
+    pick: parsedPick.data,
+    updated_at: now,
+  });
   if (upsertError)
     return {
       error:
-        "No se pudo guardar. Verifica que tu cuenta esté activa y la jornada abierta.",
+        "No se pudo guardar. Verifica que tu cuenta esté activa y el partido abierto.",
     };
 
   revalidatePath("/partidos");
   revalidatePath("/mis-puntos");
-  return { ok: true, savedAt: now };
+  return { ok: true, savedAt: now, savedPick: parsedPick.data };
 }

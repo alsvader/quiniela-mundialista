@@ -49,9 +49,9 @@ export function PendingModal({
         <p className="font-semibold text-on-surface">
           Mientras tu cuenta siga pendiente no puedes guardar pronósticos.
           {deadline && (
-            <> La próxima jornada cierra el {deadline}.</>
+            <> El próximo partido cierra el {deadline}.</>
           )}{" "}
-          Las jornadas que cierren antes de tu activación se pierden sin
+          Los partidos que cierren antes de tu activación se pierden sin
           recurso.
         </p>
       </div>
