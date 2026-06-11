@@ -51,7 +51,8 @@ export function RegisterForm({ completing }: { completing: boolean }) {
         required
         minLength={3}
         maxLength={20}
-        pattern="[A-Za-z0-9_.\-]+"
+        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9_.\-]+( [A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9_.\-]+)*"
+        title="Letras (con acentos), números, punto, guion o guion bajo; espacios sencillos entre palabras."
         hint="Tu nombre público en el ranking."
         error={fe.alias}
       />

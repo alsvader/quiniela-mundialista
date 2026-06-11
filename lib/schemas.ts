@@ -27,9 +27,16 @@ export const profileFieldsSchema = z.object({
   alias: z
     .string()
     .trim()
+    // NFC: lo pegado desde macOS puede venir en NFD (acento combinante), que
+    // no matchearía el charset y crearía duplicados visuales con bytes distintos
+    .normalize("NFC")
+    .min(3, "Mínimo 3 caracteres.")
+    .max(20, "Máximo 20 caracteres.")
     .regex(
-      /^[A-Za-z0-9_.-]{3,20}$/,
-      "De 3 a 20 caracteres: letras, números, punto, guion o guion bajo."
+      // misma regla que el CHECK profiles_alias_format (migración 0005):
+      // palabras unidas por espacios sencillos, sin extremos ni dobles espacios
+      /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9_.-]+( [A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9_.-]+)*$/,
+      "Letras (con acentos), números, punto, guion o guion bajo; espacios sencillos entre palabras."
     ),
   phone: z
     .string()
