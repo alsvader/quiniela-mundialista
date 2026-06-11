@@ -5,18 +5,20 @@ import { buildWhatsappLink } from "@/lib/whatsapp";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(public)/auth-actions";
 import { PendingBanner } from "./pending-banner";
-import { isJornadaOpen } from "@/lib/domain/jornada";
+import { isMatchOpen } from "@/lib/domain/jornada";
 
-async function nextOpenJornada(): Promise<string | null> {
+/** Kickoff del próximo partido aún abierto (cierre = kickoff − 1h), o null. */
+async function nextOpenKickoff(): Promise<string | null> {
   const supabase = await createClient();
-  // isJornadaOpen y no `match_date > hoy`: las excepciones fechadas (jornada
-  // inaugural) mantienen abierta una jornada cuyo día ya llegó
   const { data } = await supabase
     .from("matches")
-    .select("match_date")
-    .order("match_date", { ascending: true });
-  const dates = [...new Set((data ?? []).map((m) => m.match_date as string))];
-  return dates.find((d) => isJornadaOpen(d)) ?? null;
+    .select("kickoff_at")
+    .order("kickoff_at", { ascending: true });
+  return (
+    (data ?? [])
+      .map((m) => m.kickoff_at as string)
+      .find((k) => isMatchOpen(k)) ?? null
+  );
 }
 
 export default async function ParticipanteLayout({
@@ -27,13 +29,13 @@ export default async function ParticipanteLayout({
   const { user, profile } = await requireSession();
 
   let whatsappLink: string | null = null;
-  let nextJornada: string | null = null;
+  let nextKickoff: string | null = null;
   if (profile.status === "pending") {
-    const [number, jornada] = await Promise.all([
+    const [number, kickoff] = await Promise.all([
       getWhatsappNumber(),
-      nextOpenJornada(),
+      nextOpenKickoff(),
     ]);
-    nextJornada = jornada;
+    nextKickoff = kickoff;
     whatsappLink = buildWhatsappLink(number, {
       name: profile.full_name,
       email: user.email ?? "",
@@ -47,7 +49,7 @@ export default async function ParticipanteLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       {profile.status === "pending" && (
-        <PendingBanner whatsappLink={whatsappLink} nextJornada={nextJornada} />
+        <PendingBanner whatsappLink={whatsappLink} nextKickoff={nextKickoff} />
       )}
       {profile.status === "disabled" && (
         <div

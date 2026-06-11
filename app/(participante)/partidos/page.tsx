@@ -7,18 +7,19 @@ import {
   getMyPredictions,
   getWhatsappNumber,
 } from "@/lib/queries";
-import { isJornadaOpen } from "@/lib/domain/jornada";
+import { isMatchOpen } from "@/lib/domain/jornada";
 import { prizePool } from "@/lib/domain/prize";
 import { PrizePoolCard } from "@/components/prize-pool-card";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import {
   formatDeadline,
+  formatDeadlineTime,
   formatJornadaDate,
   formatKickoffTime,
   formatDateTime,
 } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
-import { JornadaForm, type MatchForForm } from "./jornada-form";
+import { MatchPickCard, type MatchForCard } from "./match-pick-card";
 import { ClosedMatchCard } from "./closed-match-card";
 import { PendingModal } from "../pending-modal";
 
@@ -37,11 +38,14 @@ export default async function PartidosPage() {
   let modal: React.ReactNode = null;
   if (profile.status === "pending") {
     const number = await getWhatsappNumber();
-    const next = [...jornadas.keys()].find((d) => isJornadaOpen(d)) ?? null;
+    // próximo partido aún abierto (getJornadas ordena por fecha y kickoff)
+    const next = [...jornadas.values()]
+      .flat()
+      .find((m) => isMatchOpen(m.kickoff_at));
     modal = (
       <Suspense>
         <PendingModal
-          deadline={next ? formatDeadline(next) : null}
+          deadline={next ? formatDeadline(next.kickoff_at) : null}
           whatsappLink={buildWhatsappLink(number, {
             name: profile.full_name,
             email: user.email ?? "",
@@ -60,8 +64,8 @@ export default async function PartidosPage() {
           <h1 className="heading-display text-3xl sm:text-4xl">Partidos</h1>
           <p className="mt-2 max-w-prose text-sm text-on-surface-variant">
             Pronostica el resultado de cada partido: local (L), empate (E) o
-            visitante (V). Cada jornada cierra a las 23:59 del día anterior y
-            se guarda completa.
+            visitante (V). Cada partido se guarda por separado y cierra una
+            hora antes de su inicio.
           </p>
         </div>
         <PrizePoolCard pool={prizePool(activeCount)} />
@@ -69,12 +73,9 @@ export default async function PartidosPage() {
 
       <div className="mt-8 flex flex-col gap-12">
         {[...jornadas.entries()].map(([date, matches]) => {
-          const open = isJornadaOpen(date);
-          const lastModified = matches
-            .map((m) => predictions.get(m.id)?.updated_at)
-            .filter(Boolean)
-            .sort()
-            .at(-1);
+          const openCount = matches.filter((m) =>
+            isMatchOpen(m.kickoff_at)
+          ).length;
 
           return (
             <section key={date} aria-label={`Jornada del ${formatJornadaDate(date)}`}>
@@ -82,18 +83,29 @@ export default async function PartidosPage() {
                 <h2 className="heading-display text-lg sm:text-xl">
                   {formatJornadaDate(date)}
                 </h2>
-                {open ? (
-                  <Chip tone="primary">Abierta · cierra {formatDeadline(date)}</Chip>
-                ) : (
+                {openCount === 0 ? (
                   <Chip tone="neutral">Cerrada</Chip>
+                ) : openCount === matches.length ? (
+                  <Chip tone="primary">Abierta</Chip>
+                ) : (
+                  <Chip tone="primary">
+                    {openCount} de {matches.length} abiertos
+                  </Chip>
                 )}
               </header>
 
-              {open && canEdit ? (
-                <JornadaForm
-                  matchDate={date}
-                  matches={matches.map(
-                    (m): MatchForForm => ({
+              {openCount > 0 && !canEdit && (
+                <p className="mb-3 text-sm font-semibold text-secondary-fixed">
+                  {profile.status === "pending"
+                    ? "Activa tu cuenta para pronosticar los partidos abiertos."
+                    : "Tu cuenta está desactivada: no puedes pronosticar."}
+                </p>
+              )}
+              <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 p-0">
+                {matches.map((m) => {
+                  const prediction = predictions.get(m.id);
+                  if (canEdit && isMatchOpen(m.kickoff_at)) {
+                    const match: MatchForCard = {
                       id: m.id,
                       home: m.home_team,
                       away: m.away_team,
@@ -101,34 +113,24 @@ export default async function PartidosPage() {
                       awayCode: m.away_code,
                       group: m.group_label,
                       time: formatKickoffTime(m.kickoff_at),
-                      pick: predictions.get(m.id)?.pick ?? null,
-                    })
-                  )}
-                  lastModified={
-                    lastModified ? formatDateTime(lastModified) : null
+                      closesAt: formatDeadlineTime(m.kickoff_at),
+                      pick: prediction?.pick ?? null,
+                      lastModified: prediction
+                        ? formatDateTime(prediction.updated_at)
+                        : null,
+                    };
+                    return <MatchPickCard key={m.id} match={match} />;
                   }
-                />
-              ) : (
-                <>
-                  {open && !canEdit && (
-                    <p className="mb-3 text-sm font-semibold text-secondary-fixed">
-                      {profile.status === "pending"
-                        ? "Activa tu cuenta para pronosticar esta jornada."
-                        : "Tu cuenta está desactivada: no puedes pronosticar."}
-                    </p>
-                  )}
-                  <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 p-0">
-                    {matches.map((m) => (
-                      <ClosedMatchCard
-                        key={m.id}
-                        match={m}
-                        pick={predictions.get(m.id)?.pick ?? null}
-                        time={formatKickoffTime(m.kickoff_at)}
-                      />
-                    ))}
-                  </ul>
-                </>
-              )}
+                  return (
+                    <ClosedMatchCard
+                      key={m.id}
+                      match={m}
+                      pick={prediction?.pick ?? null}
+                      time={formatKickoffTime(m.kickoff_at)}
+                    />
+                  );
+                })}
+              </ul>
             </section>
           );
         })}

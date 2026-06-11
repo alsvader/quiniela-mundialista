@@ -1,4 +1,4 @@
-import { jornadaDeadline, TIMEZONE } from "@/lib/domain/jornada";
+import { matchDeadline, TIMEZONE } from "@/lib/domain/jornada";
 
 const dayFormatter = new Intl.DateTimeFormat("es-MX", {
   timeZone: TIMEZONE,
@@ -39,22 +39,22 @@ export function formatDateTime(iso: string | Date): string {
   return dateTimeFormatter.format(typeof iso === "string" ? new Date(iso) : iso);
 }
 
+const deadlineDayFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  day: "numeric",
+  month: "long",
+});
+
 /**
- * Fecha límite legible de una jornada, derivada del deadline real.
- * Regla general (medianoche): "10 de junio a las 23:59" (el día anterior).
- * Excepciones fechadas: el instante exacto, ej. "11 de junio a las 12:00".
+ * Fecha límite legible de un partido (kickoff − 1h, spec match-schedule):
+ * "11 de junio a las 12:00".
  */
-export function formatDeadline(matchDate: string): string {
-  const deadline = jornadaDeadline(matchDate);
-  const dayFmt = new Intl.DateTimeFormat("es-MX", {
-    timeZone: TIMEZONE,
-    day: "numeric",
-    month: "long",
-  });
-  const isMidnight = timeFormatter.format(deadline) === "00:00";
-  if (isMidnight) {
-    const previous = new Date(deadline.getTime() - 60_000); // 23:59 del día anterior
-    return `${dayFmt.format(previous)} a las 23:59`;
-  }
-  return `${dayFmt.format(deadline)} a las ${timeFormatter.format(deadline)}`;
+export function formatDeadline(kickoffAt: string): string {
+  const deadline = matchDeadline(kickoffAt);
+  return `${deadlineDayFormatter.format(deadline)} a las ${timeFormatter.format(deadline)}`;
+}
+
+/** Solo la hora del cierre de un partido, "12:00" (CDMX). */
+export function formatDeadlineTime(kickoffAt: string): string {
+  return timeFormatter.format(matchDeadline(kickoffAt));
 }
