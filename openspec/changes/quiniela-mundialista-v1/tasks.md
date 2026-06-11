@@ -3,7 +3,7 @@
 ## 1. Fundación del proyecto
 
 - [x] 1.1 Inicializar app Next.js (App Router) con TypeScript y Tailwind CSS; repositorio git
-- [ ] 1.2 Crear proyecto Supabase y configurar variables de entorno locales (`.env.local` + `.env.example` con URL, anon key, service role key, ADMIN_EMAIL, ADMIN_PASSWORD)
+- [x] 1.2 Crear proyecto Supabase y configurar variables de entorno locales (`.env.local` + `.env.example` con URL, anon key, service role key, ADMIN_EMAIL, ADMIN_PASSWORD)
 - [x] 1.3 Configurar clientes de Supabase para servidor (Server Components/Actions) y navegador, con manejo de sesión por cookies (`@supabase/ssr`)
 - [x] 1.4 Integrar sistema de diseño: DESIGN.md (export de Google Stitch) y PRODUCT.md en la raíz; mapear tokens de DESIGN.md a la configuración de Tailwind
 
