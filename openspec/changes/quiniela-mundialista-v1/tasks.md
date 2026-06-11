@@ -106,3 +106,9 @@
 - [x] 16.1 Restringir SELECT de `app_settings` a `authenticated` (el WhatsApp del admin deja de ser legible por anónimos); amendar 0001 y `db reset` local
 - [x] 16.2 Cabeceras de seguridad en `next.config.ts`: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy mínima
 - [x] 16.3 Verificación: check de privacidad en smoke-test (anon no lee app_settings), curl de cabeceras y suite completa
+
+## 17. Vista ranking → función (advisor de Supabase)
+
+- [x] 17.1 Migración 0003: reemplazar la vista `ranking` (security definer) por función `ranking()` security definer con `search_path` fijado — mismo contrato (alias, points), grants solo a anon/authenticated; resuelve el lint "security_definer_view"
+- [x] 17.2 Adaptar `getRanking`/`getActiveParticipantCount` a `.rpc()` y actualizar smoke-test
+- [x] 17.3 Aplicar a local (db reset) y producción (db push), verificar advisor limpio y suite completa

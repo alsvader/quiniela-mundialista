@@ -144,7 +144,7 @@ const { error: scoreError } = await admin
 check("admin captura marcador 2-1", !scoreError, scoreError?.message);
 
 const publicClient = anon();
-let { data: ranking } = await publicClient.from("ranking").select("*");
+let { data: ranking } = await publicClient.rpc("ranking");
 let row = ranking?.find((r) => r.alias === alias);
 check("ranking público (sin sesión) muestra al usuario con 1 punto", row?.points === 1, `puntos=${row?.points}`);
 
@@ -154,7 +154,7 @@ const { error: fixError } = await admin
   .eq("id", openMatch.id);
 check("admin corrige a 1-1", !fixError);
 
-({ data: ranking } = await publicClient.from("ranking").select("*"));
+({ data: ranking } = await publicClient.rpc("ranking"));
 row = ranking?.find((r) => r.alias === alias);
 check("corrección recalcula: ahora 0 puntos", row?.points === 0, `puntos=${row?.points}`);
 
@@ -170,7 +170,7 @@ check("autenticado sí lee app_settings", (authedSettings?.length ?? 0) > 0);
 
 // ---------- 7. Desactivación reversible ----------
 await admin.from("profiles").update({ status: "disabled" }).eq("id", userId);
-({ data: ranking } = await publicClient.from("ranking").select("*"));
+({ data: ranking } = await publicClient.rpc("ranking"));
 check("desactivado desaparece del ranking", !ranking?.find((r) => r.alias === alias));
 
 const { error: disabledPredictError } = await user
@@ -179,7 +179,7 @@ const { error: disabledPredictError } = await user
 check("RLS bloquea pronóstico de cuenta desactivada", !!disabledPredictError);
 
 await admin.from("profiles").update({ status: "active" }).eq("id", userId);
-({ data: ranking } = await publicClient.from("ranking").select("*"));
+({ data: ranking } = await publicClient.rpc("ranking"));
 check(
   "reactivación restaura puntos intactos",
   ranking?.find((r) => r.alias === alias)?.points === 0
