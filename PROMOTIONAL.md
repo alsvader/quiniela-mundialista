@@ -161,6 +161,87 @@ light backgrounds.
 
 ---
 
+## 4. Flyer "Cómo activar tu cuenta" — 9:16 con capturas reales
+
+Flyer de onboarding para historias (Instagram/WhatsApp) con los 5 pasos de
+activación. Usa las capturas reales de la app que viven en `promotional/`:
+
+| Archivo | Contenido |
+|---|---|
+| `flyer-01-registro.png` | Formulario de registro lleno |
+| `flyer-02-modal-whatsapp.png` | Modal "Falta validar tu pago" con botón de WhatsApp |
+| `flyer-03-pendiente.png` | Partidos en solo lectura con banner "Activar por WhatsApp" |
+| `flyer-04-admin-activa.png` | Panel admin con el usuario "Activo" (opcional) |
+| `flyer-05-pronosticos.png` | Botones L/E/V habilitados con "L" seleccionada |
+
+**Cómo usarlo en ChatGPT (1 sola generación):** adjunta `flyer-01-registro.png`,
+`flyer-02-modal-whatsapp.png` y `flyer-05-pronosticos.png` al mensaje junto con
+este prompt:
+
+```
+Design a vertical 9:16 instructional flyer for Instagram/WhatsApp stories for
+"Quiniela Mundialista 2026", a private World Cup prediction game. Premium
+retro-futurist "cyber-stadium" aesthetic with modern glassmorphism —
+sophisticated and restrained, NOT kitschy 80s synthwave.
+
+BACKGROUND: deep dark violet-purple (#1a0b2e) with a subtle cyan perspective
+grid at very low opacity (5%) and a soft volumetric purple gradient, like a
+dark high-tech stadium.
+
+HEADLINE at the top (in Spanish), bold italic condensed heavy extended
+sans-serif (style of the "Anybody" typeface), white, tight letter spacing:
+"ACTÍVATE Y JUEGA". Small subtitle below: "Así entras a la quiniela en 5 pasos".
+
+CONTENT: a vertical sequence of 5 numbered steps. Each step is a frosted-glass
+card (semi-transparent, blurred, 1px luminous cyan gradient border, 12px
+rounded corners, soft cyan glow instead of black shadows) with a glowing
+cyan (#00f3ff) number chip and short Spanish text:
+
+1. "Crea tu cuenta" — place the FIRST attached screenshot (registration form)
+   inside a slim glowing phone frame next to this step.
+2. "Contacta al admin por WhatsApp" — place the SECOND attached screenshot
+   (payment modal with the lime WhatsApp button) next to this step. Add a
+   small WhatsApp-green chat bubble icon.
+3. "Transfiere $100 MXN" — text-only card with the amount "$100" big, in
+   mono-spaced font, lime green (#bded00): "y manda tu comprobante".
+4. "El admin activa tu cuenta" — text-only card with a lime green check mark
+   and the mono-spaced label "CUENTA ACTIVA".
+5. "Recarga la web y pronostica" — place the THIRD attached screenshot
+   (match list with L/E/V buttons, the "L" selected in lime green) next to
+   this step.
+
+IMPORTANT: reproduce the three attached screenshots as faithfully as possible
+inside their phone frames — do not redesign them, do not change their colors
+or layout; they show the real app UI.
+
+COLOR DISCIPLINE: dominant deep purple; electric cyan as main accent, lime
+green (#bded00) only for money, success and the selected prediction; magenta
+(#ff24e4) at most once as a small highlight. High-contrast white text.
+
+FOOTER: a tiny mono-spaced chip near the bottom: "CIERRE DE JORNADA 23:59 CDMX".
+
+SAFE ZONES: no text or key elements in the top 15% or bottom 15% of the
+canvas (the stories UI covers those zones).
+
+AVOID: FIFA logos or the official trophy, real team crests, betting-odds
+clutter, scanlines, VHS grain, corporate blue, light backgrounds.
+```
+
+**Plan B (resultado más fiel, también 1 generación):** los generadores
+redibujan las capturas adjuntas y el texto pequeño de la UI puede salir con
+erratas. Si pasa, pide la misma imagen pero con los tres marcos de teléfono
+VACÍOS (solo el borde con glow cian sobre fondo oscuro) y monta tú las
+capturas reales encima con Canva/Figma/Keynote. Frase para pedirlo en la
+misma conversación:
+
+```
+Genera la misma imagen pero deja los tres marcos de teléfono vacíos (solo el
+marco con borde luminoso cian y fondo oscuro adentro), sin pantalla dibujada:
+voy a montar yo las capturas reales encima.
+```
+
+---
+
 ## Prompts de seguimiento (misma conversación de ChatGPT)
 
 Si ya generaste una versión y quieres otro formato sin repetir todo:

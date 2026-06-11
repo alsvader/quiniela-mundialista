@@ -13,4 +13,4 @@
 ## 3. Verificación y despliegue
 
 - [x] 3.1 Suite local completa (tests de dominio nuevos, smoke, e2e, build)
-- [ ] 3.2 `db push` de 0004 a producción + push a main (Vercel) + verificación contra prod: RLS acepta pick en jornada del 11 y el chip muestra la nueva hora límite
+- [x] 3.2 `db push` de 0004 a producción + push a main (Vercel) + verificación contra prod: RLS acepta pick en jornada del 11 y el chip muestra la nueva hora límite
