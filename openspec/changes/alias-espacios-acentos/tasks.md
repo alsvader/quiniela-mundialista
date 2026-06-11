@@ -15,4 +15,4 @@
 ## 4. Verificación
 
 - [x] 4.1 Probar en local el registro con "Don Linux" y "Ramón" (aceptados) y con " DonLinux", "Don  Linux", "AB" (rechazados con el mensaje nuevo), incluyendo que el CHECK de Postgres acepta el insert.
-- [ ] 4.2 Aplicar la migración 0005 en Supabase cloud (`supabase db push`), desplegar en Vercel y verificar en producción un registro con espacio y acento.
+- [x] 4.2 Aplicar la migración 0005 en Supabase cloud (`supabase db push`), desplegar en Vercel y verificar en producción un registro con espacio y acento.
