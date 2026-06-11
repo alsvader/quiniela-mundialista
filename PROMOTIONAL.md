@@ -242,6 +242,93 @@ voy a montar yo las capturas reales encima.
 
 ---
 
+## 5. Flyer "¿Cómo se reparte la bolsa?" — 9:16
+
+Flyer para historias (Instagram/WhatsApp) que explica el reparto del monto
+acumulado. Reglas reales (openspec design D11): de cada $100 de inscripción,
+$70 entran a la bolsa; se reparte 50/30/20 entre los 3 primeros; los empatados
+comparten las porciones de las posiciones que ocupan; el pago de premios es
+directo con el administrador, fuera de la app.
+
+Capturas de apoyo en `promotional/`:
+
+| Archivo | Contenido |
+|---|---|
+| `flyer-07-bolsa-card.png` | Tarjeta real "Bolsa acumulada" con el reparto 50/30/20 |
+| `flyer-06-ranking-bolsa.png` | Ranking público completo con la bolsa (alternativa) |
+
+**Cómo usarlo en ChatGPT (1 sola generación, sin adjuntos):** la tarjeta de
+bolsa se dibuja como réplica con un monto de ejemplo, así que no hace falta
+adjuntar capturas — pega el prompt y listo. (Las capturas de la tabla quedan
+como referencia opcional de cómo se ve la tarjeta real.)
+
+```
+Design a vertical 9:16 explainer flyer for Instagram/WhatsApp stories for
+"Quiniela Mundialista 2026", a private World Cup prediction game. Premium
+retro-futurist "cyber-stadium" aesthetic with modern glassmorphism —
+sophisticated and restrained, NOT kitschy 80s synthwave.
+
+BACKGROUND: deep dark violet-purple (#1a0b2e) with a subtle cyan perspective
+grid at very low opacity (5%) and a soft volumetric purple gradient, like a
+dark high-tech stadium.
+
+HEADLINE at the top (in Spanish), bold italic condensed heavy extended
+sans-serif (style of the "Anybody" typeface), white, tight letter spacing:
+"¿CÓMO SE REPARTE LA BOLSA?". Small subtitle below: "Los 3 primeros lugares
+se llevan todo".
+
+CENTERPIECE: a futuristic neon podium of three frosted-glass blocks
+(semi-transparent, blurred, 1px luminous cyan gradient borders, 12px rounded
+corners, soft glow instead of black shadows), the 1st-place block tallest in
+the center. On each block, big mono-spaced lime green (#bded00) percentages
+and white labels in Spanish:
+- center, tallest: "1°" and "50%"
+- left, medium: "2°" and "30%"
+- right, shortest: "3°" and "20%"
+A subtle cyan spotlight beam falls on the 1st-place block.
+
+BELOW THE PODIUM: a replica of the app's "Bolsa acumulada" card — a dark
+frosted-glass card with a thin cyan border: small white mono-spaced label
+"Bolsa acumulada", a big example amount "$1,400" in lime green (#bded00)
+mono-spaced font, and "1° 50% · 2° 30% · 3° 20%" in light gray below it.
+Next to the card, a tiny outlined chip in mono-spaced font: "EJEMPLO ·
+20 JUGADORES". Short caption underneath in Spanish: "La bolsa crece con
+cada cuenta activada y la ves en vivo en el ranking".
+
+RULES STRIP: two small frosted-glass chips with mono-spaced white text in
+Spanish: "EL 70% DE LO RECAUDADO ES LA BOLSA DE PREMIOS" and
+"EMPATES COMPARTEN PREMIO".
+
+COLOR DISCIPLINE: dominant deep purple; electric cyan as main accent, lime
+green (#bded00) only for money and percentages; magenta (#ff24e4) at most
+once as a small highlight. High-contrast white text.
+
+SAFE ZONES: no text or key elements in the top 15% or bottom 15% of the
+canvas (the stories UI covers those zones).
+
+AVOID: FIFA logos or the official trophy, real team crests, casino/betting
+imagery (no coins raining, no slot machines), scanlines, VHS grain,
+corporate blue, light backgrounds.
+```
+
+Notas:
+
+- La comisión se comunica con framing positivo: "el 70% de lo recaudado es
+  la bolsa de premios" (en vez de "la plataforma se queda el 30%"). Es la
+  misma matemática de D11, pero lidera con lo que los jugadores ganan. No se
+  omite el número a propósito: la bolsa es pública en el ranking y cualquiera
+  puede deducir la comisión — mejor leerla de frente que descubrirla.
+- El monto de la tarjeta es un ejemplo marcado como tal ("EJEMPLO ·
+  20 JUGADORES"): 20 × $70 = $1,400, que reparte $700 / $420 / $280.
+  Ajusta ambos números al tamaño real de tu grupo si quieres (siempre
+  monto = jugadores × $70, para que cuadre con el 70%).
+- Si quieres usar la tarjeta real de la app en lugar de la réplica,
+  adjunta `flyer-07-bolsa-card.png` y vuelve a la variante anterior
+  ("place the attached screenshot..."), pero recuerda que mostrará el
+  monto del momento de la captura, no el total final.
+
+---
+
 ## Prompts de seguimiento (misma conversación de ChatGPT)
 
 Si ya generaste una versión y quieres otro formato sin repetir todo:
