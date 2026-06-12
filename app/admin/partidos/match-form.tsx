@@ -85,6 +85,20 @@ export function MatchForm({
         hint="A–L para fase de grupos; vacío en eliminatorias."
       />
       <Field
+        label="Estadio (opcional)"
+        name="stadium"
+        maxLength={80}
+        defaultValue={match?.stadium ?? ""}
+        hint="Ej. Estadio Azteca. Vacío = sin sede en las cards."
+      />
+      <Field
+        label="Ciudad (opcional)"
+        name="city"
+        maxLength={80}
+        defaultValue={match?.city ?? ""}
+        hint="Ej. Ciudad de México."
+      />
+      <Field
         label="Fecha y hora (CDMX)"
         name="kickoff_local"
         type="datetime-local"

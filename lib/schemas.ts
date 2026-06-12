@@ -128,6 +128,16 @@ export const matchSchema = z.object({
     .trim()
     .max(2, "Grupo inválido.")
     .transform((s) => s || null),
+  stadium: z
+    .string()
+    .trim()
+    .max(80, "Estadio demasiado largo.")
+    .transform((s) => s || null),
+  city: z
+    .string()
+    .trim()
+    .max(80, "Ciudad demasiado larga.")
+    .transform((s) => s || null),
   kickoff_local: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Fecha y hora inválidas."),
