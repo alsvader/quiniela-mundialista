@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Calendario de partidos agrupado por jornadas (día calendario en America/Mexico_City), información de cada partido con banderas, fases del torneo soportadas y regla de cierre de jornada.
+Calendario de partidos agrupado por jornadas (día calendario en America/Mexico_City), información de cada partido con banderas, fases del torneo soportadas y regla de cierre por partido.
 
 ## Requirements
 
@@ -35,31 +35,33 @@ El modelo de partidos SHALL soportar las fases: fase de grupos, dieciseisavos de
 - **WHEN** un usuario consulta el calendario en V1
 - **THEN** solo se muestran partidos de la fase de grupos
 
-### Requirement: Cierre de jornada
-Los pronósticos de una jornada SHALL cerrar a las 23:59 (America/Mexico_City) del día anterior a la fecha de la jornada. El estado abierto/cerrado MUST calcularse a partir de la fecha de la jornada y la hora actual, sin almacenarse.
+### Requirement: Cierre por partido
+Cada partido SHALL aceptar pronósticos hasta una hora antes de su hora de
+inicio (`kickoff_at`): el partido está abierto mientras la hora actual sea
+estrictamente anterior a `kickoff_at − 1 hora`, y cerrado desde ese instante.
+El estado abierto/cerrado MUST calcularse a partir de `kickoff_at` y la hora
+actual, sin almacenarse, y MUST aplicarse de forma coherente en la lógica de
+dominio, en las políticas RLS y en los textos de fecha límite visibles
+(incluido el banner de cuenta pendiente). La regla MUST NOT tener excepciones
+fechadas. Una jornada puede estar parcialmente cerrada: cada partido se evalúa
+de forma independiente.
 
-**Excepción fechada (jornada inaugural):** la jornada del 2026-06-11 SHALL aceptar pronósticos hasta las 12:00:00 (America/Mexico_City) del 11 de junio de 2026 — una hora antes del primer kickoff. La excepción MUST aplicarse de forma coherente en la lógica de dominio, en las políticas RLS y en los textos de fecha límite visibles (incluido el banner de cuenta pendiente). Las demás jornadas conservan la regla general sin cambio.
+#### Scenario: Partido abierto
+- **WHEN** la hora actual es anterior a `kickoff_at − 1 hora` de un partido
+- **THEN** el partido está abierto y acepta guardado de pronóstico
 
-#### Scenario: Jornada abierta
-- **WHEN** la hora actual es anterior a las 00:00 del día de la jornada en America/Mexico_City
-- **THEN** la jornada está abierta y acepta guardado de pronósticos
-
-#### Scenario: Jornada cerrada
-- **WHEN** la hora actual es igual o posterior a las 00:00 del día de la jornada en America/Mexico_City
-- **THEN** la jornada está cerrada y el sistema rechaza cualquier guardado de pronósticos
+#### Scenario: Partido cerrado
+- **WHEN** la hora actual es igual o posterior a `kickoff_at − 1 hora` de un partido
+- **THEN** el partido está cerrado y el sistema (dominio y RLS) rechaza cualquier guardado de pronóstico para ese partido
 
 #### Scenario: Borde exacto del cierre
-- **WHEN** la hora actual es exactamente 23:59:59 del día anterior a la jornada
-- **THEN** la jornada sigue abierta; a partir de las 00:00:00 está cerrada
+- **WHEN** la hora actual es exactamente un segundo antes de `kickoff_at − 1 hora`
+- **THEN** el partido sigue abierto; en el instante `kickoff_at − 1 hora` está cerrado
 
-#### Scenario: Excepción de la jornada inaugural abierta
-- **WHEN** la hora actual es el 11 de junio de 2026 a las 11:59:59 (America/Mexico_City)
-- **THEN** la jornada del 2026-06-11 sigue abierta y acepta guardado de pronósticos, y su fecha límite visible dice 11 de junio a las 12:00
+#### Scenario: Jornada parcialmente cerrada
+- **WHEN** una jornada tiene un partido cuyo cierre ya pasó y otro cuyo cierre no ha llegado
+- **THEN** el partido cerrado rechaza guardados y se muestra en solo lectura, mientras el partido abierto sigue aceptando pronósticos
 
-#### Scenario: Excepción de la jornada inaugural cerrada
-- **WHEN** la hora actual es el 11 de junio de 2026 a las 12:00:00 (America/Mexico_City) o posterior
-- **THEN** la jornada del 2026-06-11 está cerrada y el sistema (dominio y RLS) rechaza cualquier guardado
-
-#### Scenario: Las demás jornadas no cambian
-- **WHEN** se evalúa cualquier jornada distinta al 2026-06-11
-- **THEN** aplica la regla general de cierre a las 23:59 del día anterior
+#### Scenario: Fecha límite visible por partido
+- **WHEN** un usuario consulta un partido abierto
+- **THEN** ve la fecha límite de ese partido (una hora antes de su inicio, en America/Mexico_City), no una fecha límite de jornada
