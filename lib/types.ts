@@ -34,6 +34,9 @@ export interface Match {
   home_code: string | null;
   away_code: string | null;
   group_label: string | null;
+  /** Sede (es-MX, naming coloquial); null = por definir (eliminatorias V2) */
+  stadium: string | null;
+  city: string | null;
   home_goals: number | null;
   away_goals: number | null;
   /** Finalización explícita del admin (live-match); null = no finalizado */

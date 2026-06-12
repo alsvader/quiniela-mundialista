@@ -18,6 +18,8 @@ export interface MatchForCard {
   time: string;
   /** Hora límite HH:MM CDMX (kickoff − 1h) */
   closesAt: string;
+  /** "Estadio · Ciudad" ya formateado, o null si la sede no está capturada */
+  venue: string | null;
   pick: Pick | null;
   /** Última modificación formateada, o null si nunca se ha guardado */
   lastModified: string | null;
@@ -68,6 +70,11 @@ export function MatchPickCard({ match }: { match: MatchForCard }) {
               <TeamFlag code={match.awayCode} />
             </span>
           </p>
+          {match.venue && (
+            <p className="label-data -mt-2 mb-4 truncate text-on-surface-variant">
+              {match.venue}
+            </p>
+          )}
           <div
             role="radiogroup"
             aria-label={`Pronóstico para ${match.home} contra ${match.away}`}

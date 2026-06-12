@@ -132,6 +132,8 @@ export default async function PartidosPage() {
                       group: m.group_label,
                       time: formatKickoffTime(m.kickoff_at),
                       closesAt: formatDeadlineTime(m.kickoff_at),
+                      venue:
+                        [m.stadium, m.city].filter(Boolean).join(" · ") || null,
                       pick: prediction?.pick ?? null,
                       lastModified: prediction
                         ? formatDateTime(prediction.updated_at)

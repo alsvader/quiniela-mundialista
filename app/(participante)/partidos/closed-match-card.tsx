@@ -30,6 +30,8 @@ export function ClosedMatchCard({
   const live = isMatchLive(match);
   const result =
     hasScore ? deriveResult(match.home_goals!, match.away_goals!) : null;
+  // "Estadio · Ciudad"; se omite la línea si la sede no está capturada
+  const venue = [match.stadium, match.city].filter(Boolean).join(" · ");
   // tu check: solo los finalizados puntúan; un parcial jamás suma
   const point = finished
     ? scorePrediction(pick, match.home_goals!, match.away_goals!)
@@ -75,6 +77,12 @@ export function ClosedMatchCard({
           <TeamFlag code={match.away_code} />
         </span>
       </div>
+
+      {venue && (
+        <p className="label-data mt-2 truncate text-on-surface-variant">
+          {venue}
+        </p>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 pt-3 text-sm">
         <span className="text-on-surface-variant">
