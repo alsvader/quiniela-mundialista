@@ -42,6 +42,6 @@
 - [x] 5.1 `npm run build` + tests verdes; prueba manual local: cards con
       sede, partido sin sede (creado a mano) sin línea, admin captura y
       corrige sede
-- [ ] 5.2 Producción: aplicar migración 0008 (seguro con código viejo:
+- [x] 5.2 Producción: aplicar migración 0008 (seguro con código viejo:
       columnas nullable invisibles), merge y deploy; verificar sedes en
       producción
