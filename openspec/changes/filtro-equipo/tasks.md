@@ -30,5 +30,5 @@
 - [x] 3.1 `npm run build` + tests verdes; prueba manual local: filtrar con y
       sin acentos, visitante, vivo exento, estado vacío + limpiar, URL
       compartida llega filtrada, móvil 390px
-- [ ] 3.2 Producción: merge y deploy (sin migraciones); verificar el filtro
+- [x] 3.2 Producción: merge y deploy (sin migraciones); verificar el filtro
       en producción
