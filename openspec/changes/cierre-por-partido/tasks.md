@@ -53,6 +53,6 @@
       (rechazo de dominio y de RLS), jornada parcialmente cerrada visible
 - [x] 5.2 Actualizar `openspec/config.yaml`: decisión 1 (cierre por partido,
       kickoff − 1h) y nota de guardado (por partido, no por jornada completa)
-- [ ] 5.3 Aplicar migración 0006 en producción y deploy del branch en el mismo
+- [x] 5.3 Aplicar migración 0006 en producción y deploy del branch en el mismo
       release (migración primero, ver design D5); verificar en producción con
       un partido próximo
