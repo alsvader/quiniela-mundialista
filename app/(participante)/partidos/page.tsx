@@ -7,11 +7,14 @@ import {
   getMyPredictions,
   getWhatsappNumber,
 } from "@/lib/queries";
+import Link from "next/link";
 import { isMatchLive, isMatchOpen } from "@/lib/domain/jornada";
+import { matchesTeam } from "@/lib/domain/team-filter";
 import { prizePool } from "@/lib/domain/prize";
 import { PrizePoolCard } from "@/components/prize-pool-card";
 import { LiveMatchCard } from "./live-match-card";
 import { LiveRefresher } from "./live-refresher";
+import { TeamFilter } from "./team-filter";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import {
   formatDeadline,
@@ -27,8 +30,14 @@ import { PendingModal } from "../pending-modal";
 
 export const metadata: Metadata = { title: "Partidos" };
 
-export default async function PartidosPage() {
+export default async function PartidosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ equipo?: string }>;
+}) {
   const { user, profile } = await requireSession();
+  const { equipo } = await searchParams;
+  const query = (equipo ?? "").trim();
   const [jornadas, predictions, activeCount] = await Promise.all([
     getJornadas(),
     getMyPredictions(),
@@ -39,7 +48,19 @@ export default async function PartidosPage() {
 
   // En vivo = ya arrancó y el admin no lo ha finalizado (spec live-match).
   // getJornadas ordena por fecha, kickoff e id: orden estable en simultáneos.
+  // Los vivos se calculan SIN filtrar: el header es independiente del filtro.
   const liveMatches = [...jornadas.values()].flat().filter((m) => isMatchLive(m));
+
+  // Filtro por equipo (spec match-schedule): jornadas sin coincidencias se
+  // omiten; query vacío = listado completo.
+  const jornadaEntries = [...jornadas.entries()]
+    .map(([date, matches]) =>
+      [date, query ? matches.filter((m) => matchesTeam(query, m)) : matches] as const
+    )
+    .filter(([, matches]) => matches.length > 0);
+  const filteredCount = query
+    ? jornadaEntries.reduce((n, [, matches]) => n + matches.length, 0)
+    : null;
 
   let modal: React.ReactNode = null;
   if (profile.status === "pending") {
@@ -89,8 +110,37 @@ export default async function PartidosPage() {
         </div>
       )}
 
+      {/* el filtro vive pegado al listado que controla; los vivos quedan fuera */}
+      <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Suspense>
+          <TeamFilter />
+        </Suspense>
+        <p aria-live="polite" className="label-data text-on-surface-variant">
+          {filteredCount !== null &&
+            `${filteredCount} ${filteredCount === 1 ? "partido" : "partidos"} de «${query}»`}
+        </p>
+      </div>
+
+      {filteredCount === 0 && (
+        <div className="glass mt-6 max-w-prose p-6 text-sm text-on-surface-variant">
+          <p className="font-semibold text-on-surface">
+            Ningún partido coincide con «{query}».
+          </p>
+          <p className="mt-1">
+            Revisa el nombre del equipo o limpia el filtro para ver todas las
+            jornadas.
+          </p>
+          <Link
+            href="/partidos"
+            className="mt-4 inline-flex h-11 items-center rounded border border-outline-variant px-5 text-sm font-semibold text-on-surface transition-[border-color,box-shadow] duration-200 hover:border-primary-container/60 hover:shadow-(--shadow-glow-primary)"
+          >
+            Limpiar filtro
+          </Link>
+        </div>
+      )}
+
       <div className="mt-8 flex flex-col gap-12">
-        {[...jornadas.entries()].map(([date, matches]) => {
+        {jornadaEntries.map(([date, matches]) => {
           const openCount = matches.filter((m) =>
             isMatchOpen(m.kickoff_at)
           ).length;
