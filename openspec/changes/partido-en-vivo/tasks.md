@@ -60,6 +60,6 @@
       retiran), partido en vivo sin captura (guion), polling visible
 - [x] 5.2 Actualizar `openspec/config.yaml`: decisión 3 gana la condición
       "solo partidos finalizados puntúan"
-- [ ] 5.3 Producción: aplicar migración 0007 en un momento sin partido en
+- [x] 5.3 Producción: aplicar migración 0007 en un momento sin partido en
       curso (o verificar ese partido tras el deploy), luego merge y deploy
       en el mismo release; verificar en producción con el siguiente partido
