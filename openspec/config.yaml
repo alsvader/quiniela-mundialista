@@ -27,8 +27,11 @@ context: |
      activación se pierden sin recurso; el banner/modal debe advertirlo explícitamente.
   3. Puntuación: se compara únicamente el resultado L/E/V (derivado automáticamente de
      los goles que captura el admin) contra el pronóstico L/E/V del usuario. Acierto = 1
-     punto, error = 0. Los goles nunca participan en la comparación. Totales y ranking se
-     calculan siempre al vuelo (nunca se almacenan); corregir un marcador recalcula todo.
+     punto, error = 0. Los goles nunca participan en la comparación. SOLO los partidos
+     finalizados puntúan (finished_at, change partido-en-vivo): un marcador parcial de
+     un partido en vivo es visible pero no suma puntos ni mueve el ranking. Totales y
+     ranking se calculan siempre al vuelo (nunca se almacenan); corregir un marcador o
+     una finalización recalcula todo.
   4. Ranking público sin sesión (URL compartible). El registro pide alias obligatorio y
      es el único dato expuesto públicamente; nombre/correo/teléfono solo los ve el admin.
   5. Usuario desactivado: oculto del ranking y sin poder guardar pronósticos; sus datos

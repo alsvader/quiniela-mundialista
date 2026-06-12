@@ -7,9 +7,11 @@ import {
   getMyPredictions,
   getWhatsappNumber,
 } from "@/lib/queries";
-import { isMatchOpen } from "@/lib/domain/jornada";
+import { isMatchLive, isMatchOpen } from "@/lib/domain/jornada";
 import { prizePool } from "@/lib/domain/prize";
 import { PrizePoolCard } from "@/components/prize-pool-card";
+import { LiveMatchCard } from "./live-match-card";
+import { LiveRefresher } from "./live-refresher";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import {
   formatDeadline,
@@ -35,6 +37,10 @@ export default async function PartidosPage() {
 
   const canEdit = profile.status === "active";
 
+  // En vivo = ya arrancó y el admin no lo ha finalizado (spec live-match).
+  // getJornadas ordena por fecha, kickoff e id: orden estable en simultáneos.
+  const liveMatches = [...jornadas.values()].flat().filter((m) => isMatchLive(m));
+
   let modal: React.ReactNode = null;
   if (profile.status === "pending") {
     const number = await getWhatsappNumber();
@@ -59,6 +65,7 @@ export default async function PartidosPage() {
   return (
     <>
       {modal}
+      {liveMatches.length > 0 && <LiveRefresher />}
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div>
           <h1 className="heading-display text-3xl sm:text-4xl">Partidos</h1>
@@ -68,8 +75,19 @@ export default async function PartidosPage() {
             hora antes de su inicio.
           </p>
         </div>
+        {/* un solo partido en vivo: la card vive entre el título y la bolsa */}
+        {liveMatches.length === 1 && <LiveMatchCard match={liveMatches[0]} />}
         <PrizePoolCard pool={prizePool(activeCount)} />
       </header>
+
+      {/* simultáneos (tercera jornada de grupo): fila propia antes del listado */}
+      {liveMatches.length > 1 && (
+        <div className="mt-6 flex flex-wrap gap-4">
+          {liveMatches.map((m) => (
+            <LiveMatchCard key={m.id} match={m} />
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-12">
         {[...jornadas.entries()].map(([date, matches]) => {

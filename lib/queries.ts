@@ -8,7 +8,9 @@ export async function getJornadas(): Promise<Map<string, Match[]>> {
     .from("matches")
     .select("*")
     .order("match_date", { ascending: true })
-    .order("kickoff_at", { ascending: true });
+    .order("kickoff_at", { ascending: true })
+    // desempate estable para simultáneos (cards en vivo no se reordenan)
+    .order("id", { ascending: true });
   if (error) throw new Error(`Error cargando partidos: ${error.message}`);
 
   const jornadas = new Map<string, Match[]>();

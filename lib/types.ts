@@ -36,6 +36,8 @@ export interface Match {
   group_label: string | null;
   home_goals: number | null;
   away_goals: number | null;
+  /** Finalización explícita del admin (live-match); null = no finalizado */
+  finished_at: string | null;
 }
 
 export interface Prediction {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireSession } from "@/lib/auth/guards";
 import { getJornadas, getMyPredictions } from "@/lib/queries";
 import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
+import { isMatchFinished } from "@/lib/domain/jornada";
 import { formatJornadaDate } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
 import { TeamFlag } from "@/components/team-flag";
@@ -18,7 +19,8 @@ export default async function MisPuntosPage() {
   ]);
 
   const allMatches = [...jornadas.values()].flat();
-  const scoredMatches = allMatches.filter((m) => m.home_goals !== null);
+  // solo los finalizados puntúan: un marcador parcial en vivo no cuenta aquí
+  const scoredMatches = allMatches.filter((m) => isMatchFinished(m));
   const total = scoredMatches.reduce(
     (sum, m) =>
       sum +
@@ -43,14 +45,14 @@ export default async function MisPuntosPage() {
             {total === 1 ? "punto" : "puntos"} acumulados
           </p>
           <p>
-            {scoredMatches.length} de {allMatches.length} partidos con marcador
+            {scoredMatches.length} de {allMatches.length} partidos finalizados
           </p>
         </div>
       </div>
 
       <div className="mt-10 flex flex-col gap-8">
         {[...jornadas.entries()].map(([date, matches]) => {
-          const withScore = matches.filter((m) => m.home_goals !== null);
+          const withScore = matches.filter((m) => isMatchFinished(m));
           if (!withScore.length) return null;
           const jornadaPoints = withScore.reduce(
             (s, m) =>
@@ -132,11 +134,11 @@ export default async function MisPuntosPage() {
         {scoredMatches.length === 0 && (
           <div className="glass max-w-prose p-6 text-sm text-on-surface-variant">
             <p className="font-semibold text-on-surface">
-              Aún no hay marcadores capturados.
+              Aún no hay partidos finalizados.
             </p>
             <p className="mt-1">
-              Cuando el administrador capture los resultados de los partidos,
-              aquí verás tus aciertos y puntos por jornada.
+              Cuando el administrador dé por finalizados los partidos con su
+              marcador, aquí verás tus aciertos y puntos por jornada.
             </p>
           </div>
         )}
