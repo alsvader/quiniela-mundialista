@@ -46,3 +46,29 @@ export function isMatchOpen(
 ): boolean {
   return now.getTime() < matchDeadline(kickoffAt).getTime();
 }
+
+/** Lo mínimo de un partido para derivar su estado en vivo/finalizado. */
+export interface MatchLiveness {
+  kickoff_at: string;
+  finished_at: string | null;
+}
+
+/**
+ * ¿El partido está en vivo? En vivo = ya arrancó (kickoff ≤ now) y el admin
+ * no lo ha dado por finalizado (spec live-match). La finalización es dato
+ * explícito, nunca derivada de goles ni de ventanas de tiempo.
+ */
+export function isMatchLive(
+  match: MatchLiveness,
+  now: Date = new Date()
+): boolean {
+  return (
+    match.finished_at === null &&
+    new Date(match.kickoff_at).getTime() <= now.getTime()
+  );
+}
+
+/** ¿El admin dio el partido por finalizado? Solo entonces puntúa. */
+export function isMatchFinished(match: MatchLiveness): boolean {
+  return match.finished_at !== null;
+}

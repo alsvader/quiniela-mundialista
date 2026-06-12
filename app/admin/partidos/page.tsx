@@ -2,12 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/auth/guards";
 import { getJornadas } from "@/lib/queries";
+import { isMatchFinished, isMatchLive } from "@/lib/domain/jornada";
 import { formatJornadaDate, formatKickoffTime } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
 import { TeamFlag } from "@/components/team-flag";
 import { ScoreForm } from "./score-form";
 
 export const metadata: Metadata = { title: "Partidos · Admin" };
+
+/**
+ * Umbral del recordatorio "falta finalizar": kickoff + 2.5 h (90' + descanso
+ * + agregado). Solo avisa al admin; jamás finaliza ni afecta puntos
+ * (spec admin-panel, "el aviso no decide").
+ */
+const FINISH_REMINDER_MS = 2.5 * 60 * 60 * 1000;
 
 export default async function AdminPartidosPage() {
   await requireAdminPage();
@@ -25,9 +33,9 @@ export default async function AdminPartidosPage() {
         </Link>
       </header>
       <p className="mt-2 max-w-prose text-sm text-on-surface-variant">
-        Captura el marcador final de cada partido; el resultado oficial, los
-        puntos y el ranking se recalculan solos. Corregir un marcador también
-        recalcula todo.
+        Puedes capturar el marcador durante el partido (se muestra como “En
+        vivo” a los participantes) y marcar “Finalizado” al terminar: solo los
+        partidos finalizados suman puntos. Corregir un marcador recalcula todo.
       </p>
 
       <div className="mt-8 flex flex-col gap-10">
@@ -37,7 +45,13 @@ export default async function AdminPartidosPage() {
               {formatJornadaDate(date)}
             </h2>
             <ul className="flex list-none flex-col gap-2 p-0">
-              {matches.map((m) => (
+              {matches.map((m) => {
+                const live = isMatchLive(m);
+                const needsFinish =
+                  !isMatchFinished(m) &&
+                  Date.now() - new Date(m.kickoff_at).getTime() >
+                    FINISH_REMINDER_MS;
+                return (
                 <li
                   key={m.id}
                   className="glass flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3"
@@ -55,11 +69,16 @@ export default async function AdminPartidosPage() {
                     <TeamFlag code={m.away_code} />
                     {m.away_team}
                   </span>
-                  {m.home_goals !== null && <Chip tone="secondary">Final</Chip>}
+                  {isMatchFinished(m) && <Chip tone="secondary">Final</Chip>}
+                  {live && !needsFinish && <Chip tone="primary">En vivo</Chip>}
+                  {needsFinish && (
+                    <Chip tone="error">¿Terminó? Falta finalizar</Chip>
+                  )}
                   <ScoreForm
                     matchId={m.id}
                     homeGoals={m.home_goals}
                     awayGoals={m.away_goals}
+                    finished={isMatchFinished(m)}
                   />
                   <Link
                     href={`/admin/partidos/${m.id}`}
@@ -68,7 +87,8 @@ export default async function AdminPartidosPage() {
                     Editar
                   </Link>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
         ))}

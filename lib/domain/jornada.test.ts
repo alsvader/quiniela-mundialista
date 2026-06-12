@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isMatchOpen, matchDeadline, toMxDate } from "./jornada";
+import {
+  isMatchFinished,
+  isMatchLive,
+  isMatchOpen,
+  matchDeadline,
+  toMxDate,
+} from "./jornada";
 
 // CDMX es UTC-6 todo el año (sin horario de verano desde 2022).
 // Kickoff de referencia: 13:00 CDMX = 19:00 UTC → cierre 12:00 CDMX (18:00 UTC).
@@ -45,6 +51,35 @@ describe("matchDeadline", () => {
     expect(matchDeadline(KICKOFF).toISOString()).toBe(
       "2026-06-11T18:00:00.000Z"
     );
+  });
+});
+
+describe("isMatchLive / isMatchFinished", () => {
+  const match = (finished_at: string | null) => ({
+    kickoff_at: KICKOFF,
+    finished_at,
+  });
+
+  it("no está en vivo antes del kickoff", () => {
+    expect(isMatchLive(match(null), new Date("2026-06-11T18:59:59Z"))).toBe(false);
+  });
+
+  it("está en vivo desde el instante exacto del kickoff", () => {
+    expect(isMatchLive(match(null), new Date("2026-06-11T19:00:00Z"))).toBe(true);
+  });
+
+  it("sigue en vivo horas después si el admin no lo finaliza (goles no finalizan)", () => {
+    expect(isMatchLive(match(null), new Date("2026-06-11T23:00:00Z"))).toBe(true);
+  });
+
+  it("deja de estar en vivo al finalizarse, sin importar la hora", () => {
+    const finished = match("2026-06-11T21:00:00Z");
+    expect(isMatchLive(finished, new Date("2026-06-11T21:00:01Z"))).toBe(false);
+    expect(isMatchFinished(finished)).toBe(true);
+  });
+
+  it("no finalizado nunca puntúa aunque tenga horas de terminado", () => {
+    expect(isMatchFinished(match(null))).toBe(false);
   });
 });
 

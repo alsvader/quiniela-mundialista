@@ -59,11 +59,17 @@ export async function saveScore(
 
   const parsed = scoreSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: firstError(parsed.error) };
-  const { match_id, home_goals, away_goals } = parsed.data;
+  const { match_id, home_goals, away_goals, finished } = parsed.data;
 
+  // Sin checkbox el partido queda (o vuelve a) no finalizado: la reversa para
+  // correcciones es el mismo gesto (spec live-match). Solo finalizados puntúan.
   const { error } = await session.supabase
     .from("matches")
-    .update({ home_goals, away_goals })
+    .update({
+      home_goals,
+      away_goals,
+      finished_at: finished ? new Date().toISOString() : null,
+    })
     .eq("id", match_id);
   if (error) return { error: "No se pudo guardar el marcador." };
 

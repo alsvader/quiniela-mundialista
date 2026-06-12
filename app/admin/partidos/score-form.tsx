@@ -11,10 +11,13 @@ export function ScoreForm({
   matchId,
   homeGoals,
   awayGoals,
+  finished,
 }: {
   matchId: number;
   homeGoals: number | null;
   awayGoals: number | null;
+  /** Estado actual: inicializa el checkbox para no des-finalizar por accidente */
+  finished: boolean;
 }) {
   const [state, action, pending] = useActionState<AdminState, FormData>(
     saveScore,
@@ -51,6 +54,15 @@ export function ScoreForm({
         defaultValue={awayGoals ?? ""}
         className={scoreInput}
       />
+      <label className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-semibold text-on-surface-variant">
+        <input
+          type="checkbox"
+          name="finished"
+          defaultChecked={finished}
+          className="size-4 accent-(--color-tertiary-container)"
+        />
+        Finalizado
+      </label>
       <button
         type="submit"
         disabled={pending}
