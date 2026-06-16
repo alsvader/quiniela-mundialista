@@ -410,6 +410,169 @@ Notas:
 
 ---
 
+## 7. Logo de la aplicación
+
+Identidad de la app. Los generadores de ChatGPT rinden mucho mejor con
+prompts ricos y atmosféricos (como los flyers de arriba) que con encargos de
+"logo plano / vector / minimal", que suelen salir genéricos o sucios. Por eso
+estos prompts tratan el logo como un **emblema tipo "key visual"** —el balón
+holográfico en la arena oscura con grid y glow— compuesto como logo con el
+wordmark, y no como un vector plano. Dos lockups: el principal (ícono +
+wordmark) para header y piezas grandes, y la variante cuadrada solo-ícono para
+favicon/PWA/avatar.
+
+> Nota: si necesitas un **logo vectorial plano de verdad** (SVG nítido para el
+> header, favicon escalable), conviene generar solo el emblema como referencia
+> y redibujarlo/vectorizarlo en Figma o Illustrator. Estos modelos no producen
+> vectores limpios; producen ilustraciones.
+
+### 7a. Logo principal — emblema + wordmark
+
+```
+Design a premium app LOGO / brand emblem for "Quiniela Mundialista 2026", a
+private World Cup football prediction game. Premium retro-futurist
+"cyber-stadium" aesthetic with modern glassmorphism — sophisticated and
+restrained, NOT a kitschy 80s synthwave poster. Render it as a polished,
+glowing "key visual" emblem (the same look as the promotional artwork), not a
+flat minimal vector. Centered hero composition with generous negative space.
+
+BACKGROUND: deep-space dark violet-purple (#1a0b2e), with a subtle cyan
+perspective grid at very low opacity (5%) fading into darkness, a soft
+volumetric purple gradient and faint atmospheric haze for depth — like a
+dark high-tech stadium. Keep it clean around the emblem so it reads as a logo.
+
+EMBLEM (the icon, centered or just above the wordmark): a glowing holographic
+football (soccer ball) rendered as a luminous wireframe of electric cyan
+(#00f3ff) light with subtle vibrant-magenta (#ff24e4) edge reflections,
+floating inside a rounded-square frosted-glass badge (semi-transparent,
+blurred, 12px rounded corners, 1px luminous cyan gradient border, soft cyan
+glow instead of black shadow) — like a high-tech app tile. The ball is the
+hero: crisp focus, premium neon glow.
+
+WORDMARK (below or beside the emblem): the text "QUINIELA MUNDIALISTA 2026"
+in a heavy, extended, italic, condensed sans-serif (style of the "Anybody"
+typeface), tight letter spacing, high-contrast white. Two lines —
+"QUINIELA MUNDIALISTA" larger on top, "2026" smaller below in mono-spaced
+digits (style of "JetBrains Mono") tinted electric cyan. Cleanly aligned to
+the emblem.
+
+COLOR DISCIPLINE: dominant deep purple darkness; electric cyan (#00f3ff) as
+the main accent; vibrant magenta (#ff24e4) only as a small secondary
+highlight; lime green (#bded00) at most one tiny spark. High-contrast white
+for the wordmark. Neon signals hierarchy — it must never look saturated or
+chaotic like a betting site.
+
+MOOD: high-stakes digital arena, competitive, precise, electric — premium and
+contained, not nostalgic.
+
+AVOID: FIFA logos or the official World Cup trophy, real team crests, flags,
+player likenesses, betting-odds clutter, scanlines, VHS grain, generic
+corporate blue, light backgrounds.
+```
+
+### 7b. Variante solo-ícono cuadrada — favicon / ícono PWA / avatar
+
+```
+Design a square 1:1 APP ICON / brand emblem for "Quiniela Mundialista 2026",
+a private World Cup football prediction game. Premium retro-futurist
+"cyber-stadium" aesthetic with modern glassmorphism — sophisticated and
+restrained, NOT kitschy 80s synthwave. Render it as a polished glowing emblem
+(same look as the promotional artwork), single mark only, no text.
+
+CANVAS: a rounded-square app tile (iOS/Android style) filled with a deep
+violet-purple (#1a0b2e) frosted-glass surface, a faint cyan perspective grid
+at very low opacity (5%) fading into the corners, and a soft volumetric purple
+glow for depth. A 1px luminous cyan (#00f3ff) gradient border traces the tile
+edge.
+
+EMBLEM, centered: a glowing holographic football (soccer ball) rendered as a
+luminous wireframe of electric-cyan (#00f3ff) light with subtle
+vibrant-magenta (#ff24e4) edge reflections, floating with a soft cyan glow
+(no black shadow). Keep the silhouette clear and bold so it still reads at
+small sizes; leave generous internal padding so the mark isn't cropped by the
+rounded corners.
+
+COLOR DISCIPLINE: deep purple base, electric cyan as the main accent, magenta
+as a single tiny highlight. High contrast, premium, calm.
+
+MOOD: high-tech digital arena, competitive and electric, premium and
+contained.
+
+AVOID: FIFA logos or the official trophy, real team crests, flags, player
+likenesses, text/wordmark, betting clutter, scanlines, VHS grain, corporate
+blue, light backgrounds.
+```
+
+### Prompts de seguimiento del logo (misma conversación)
+
+**Ícono cuadrado a partir del emblema de 7a (recomendado):** si ya te gustó
+el logo de 7a, no uses 7b desde cero — quédate en el mismo chat y pide la
+versión cuadrada del MISMO emblema, así el favicon/avatar queda idéntico al
+logo:
+
+```
+Toma EXACTAMENTE el mismo emblema del balón holográfico que acabas de generar
+(mismo estilo, mismas líneas, mismos colores) y conviértelo en un APP ICON
+cuadrado 1:1, sin texto.
+
+CANVAS: a rounded-square app tile (iOS/Android style) filled with the same
+deep violet-purple (#1a0b2e) frosted-glass surface, the same faint cyan
+perspective grid at very low opacity (5%) fading into the corners, and a soft
+volumetric purple glow. A 1px luminous cyan (#00f3ff) gradient border traces
+the tile edge.
+
+EMBLEM: center the same holographic football wireframe (electric cyan #00f3ff
+with subtle magenta #ff24e4 edge reflections, soft cyan glow, no black shadow).
+Keep the silhouette bold and clear so it still reads at 32px, with generous
+internal padding so it isn't cropped by the rounded corners. Remove the
+wordmark completely — icon only.
+
+AVOID: any text, FIFA logos or trophy, real crests, flags, players, scanlines,
+VHS grain, corporate blue, light backgrounds.
+```
+
+Para el favicon real: genera a la resolución más alta posible y redúcela a
+512/192/32 px. A 32 px el grid del fondo casi no se ve — por eso el prompt
+insiste en que la **silueta del balón** sea clara y con padding generoso.
+
+**Versión horizontal (lockup para header web):**
+
+```
+Genera la misma identidad pero en lockup horizontal: el ícono a la izquierda
+y el wordmark "QUINIELA MUNDIALISTA 2026" a la derecha en una sola línea,
+alineados verticalmente al centro, manteniendo exactamente los mismos colores
+y estilo.
+```
+
+**Versión monocromática (para fondos claros o impresión):**
+
+```
+Ahora una versión monocromática del logo en un solo tono cian (#00f3ff) sobre
+fondo transparente, sin glow ni glassmorphism, líneas limpias tipo vector,
+para usos donde no se puede el fondo oscuro.
+```
+
+**Sobre fondo transparente (para montar en la app):**
+
+```
+Genera el mismo logo principal pero con fondo totalmente transparente (PNG),
+solo el ícono y el wordmark, sin recuadro de fondo.
+```
+
+Notas:
+
+- **Texto pequeño:** igual que en los flyers, los generadores suelen meter
+  erratas en texto largo. Si "QUINIELA MUNDIALISTA 2026" sale con errores,
+  pide solo el **ícono** (7b) y monta el wordmark en Figma/Canva con la fuente
+  Anybody real — así garantizas la tipografía exacta de `DESIGN.md`.
+- **Por qué dos lockups:** el cuadrado (7b) es el favicon / ícono PWA / avatar
+  de WhatsApp; el principal (7a) es para header y piezas grandes. Pedirlos por
+  separado da mejor legibilidad que recortar uno del otro.
+- Mismas restricciones de marca que el resto del archivo (sin FIFA, trofeo,
+  escudos ni jugadores) y misma disciplina de color del sistema "Cyber-Stadium".
+
+---
+
 ## Prompts de seguimiento (misma conversación de ChatGPT)
 
 Si ya generaste una versión y quieres otro formato sin repetir todo:
