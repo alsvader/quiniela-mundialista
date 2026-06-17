@@ -10,13 +10,20 @@ import {
 import Link from "next/link";
 import { isMatchLive, isMatchOpen } from "@/lib/domain/jornada";
 import { matchesTeam } from "@/lib/domain/team-filter";
+import {
+  filterJornadasByDays,
+  resolveSelectedDays,
+  todayInMexicoCity,
+} from "@/lib/domain/day-filter";
 import { prizePool } from "@/lib/domain/prize";
 import { PrizePoolCard } from "@/components/prize-pool-card";
+import { DayFilter } from "@/components/day-filter";
 import { LiveMatchCard } from "./live-match-card";
 import { LiveRefresher } from "./live-refresher";
 import { TeamFilter } from "./team-filter";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import {
+  formatDayChip,
   formatDeadline,
   formatDeadlineTime,
   formatJornadaDate,
@@ -33,10 +40,10 @@ export const metadata: Metadata = { title: "Partidos" };
 export default async function PartidosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ equipo?: string }>;
+  searchParams: Promise<{ equipo?: string; dia?: string }>;
 }) {
   const { user, profile } = await requireSession();
-  const { equipo } = await searchParams;
+  const { equipo, dia } = await searchParams;
   const query = (equipo ?? "").trim();
   const [jornadas, predictions, activeCount] = await Promise.all([
     getJornadas(),
@@ -51,9 +58,23 @@ export default async function PartidosPage({
   // Los vivos se calculan SIN filtrar: el header es independiente del filtro.
   const liveMatches = [...jornadas.values()].flat().filter((m) => isMatchLive(m));
 
-  // Filtro por equipo (spec match-schedule): jornadas sin coincidencias se
-  // omiten; query vacío = listado completo.
-  const jornadaEntries = [...jornadas.entries()]
+  // Filtro por día (spec match-schedule): la tira se arma con TODAS las fechas
+  // con partidos; "hoy" y la selección por defecto se resuelven en servidor.
+  const matchDates = [...jornadas.keys()];
+  const today = todayInMexicoCity();
+  const daySelection = resolveSelectedDays(dia, matchDates, today);
+  const dayOptions = matchDates.map((date) => ({ date, ...formatDayChip(date) }));
+
+  // Buscar un equipo SIEMPRE abarca todo el torneo: el filtro de día se pausa
+  // mientras hay búsqueda (si no, tener otro día puesto escondería los partidos
+  // del equipo buscado). La selección de día se preserva en la URL y se restaura
+  // al limpiar el equipo; la tira se muestra atenuada como "en pausa".
+  const teamSearching = query.length > 0;
+  const effectiveDays = teamSearching ? [] : daySelection;
+
+  // Filtro combinado (spec match-schedule): primero por día, luego por equipo;
+  // jornadas sin coincidencias se omiten. query vacío = sin filtro de equipo.
+  const jornadaEntries = [...filterJornadasByDays(jornadas, effectiveDays).entries()]
     .map(([date, matches]) =>
       [date, query ? matches.filter((m) => matchesTeam(query, m)) : matches] as const
     )
@@ -110,15 +131,26 @@ export default async function PartidosPage({
         </div>
       )}
 
-      {/* el filtro vive pegado al listado que controla; los vivos quedan fuera */}
-      <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+      {/* los filtros viven pegados al listado que controlan; los vivos quedan fuera */}
+      <div className="mt-8 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Suspense>
+            <TeamFilter />
+          </Suspense>
+          <p aria-live="polite" className="label-data text-on-surface-variant">
+            {filteredCount !== null &&
+              `${filteredCount} ${filteredCount === 1 ? "partido" : "partidos"} de «${query}»`}
+          </p>
+        </div>
         <Suspense>
-          <TeamFilter />
+          <DayFilter
+            days={dayOptions}
+            today={today}
+            selected={daySelection}
+            basePath="/partidos"
+            disabled={teamSearching}
+          />
         </Suspense>
-        <p aria-live="polite" className="label-data text-on-surface-variant">
-          {filteredCount !== null &&
-            `${filteredCount} ${filteredCount === 1 ? "partido" : "partidos"} de «${query}»`}
-        </p>
       </div>
 
       {filteredCount === 0 && (

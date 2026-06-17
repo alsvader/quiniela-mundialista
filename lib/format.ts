@@ -34,6 +34,32 @@ export function formatKickoffTime(kickoffAt: string): string {
   return timeFormatter.format(new Date(kickoffAt));
 }
 
+const dayChipWeekdayFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  weekday: "short",
+});
+const dayChipDayFormatter = new Intl.DateTimeFormat("es-MX", {
+  timeZone: TIMEZONE,
+  day: "numeric",
+});
+
+/**
+ * Etiqueta de la celda de la tira de días (filtro por día, spec
+ * match-schedule): abreviatura del día ("dom"…"sáb", sin punto) y número, en
+ * CDMX, a partir de una fecha de jornada YYYY-MM-DD. Se calcula en servidor
+ * para que el cliente no derive fechas (sin drift de zona horaria).
+ */
+export function formatDayChip(matchDate: string): {
+  weekday: string;
+  day: string;
+} {
+  const d = new Date(`${matchDate}T12:00:00-06:00`);
+  return {
+    weekday: dayChipWeekdayFormatter.format(d).replace(".", ""),
+    day: dayChipDayFormatter.format(d),
+  };
+}
+
 /** "10 jun, 23:59" para fechas con hora (cierres, última modificación). */
 export function formatDateTime(iso: string | Date): string {
   return dateTimeFormatter.format(typeof iso === "string" ? new Date(iso) : iso);

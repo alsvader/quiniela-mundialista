@@ -33,8 +33,14 @@ export function TeamFilter() {
   function navigate(query: string) {
     const q = query.trim();
     lastSent.current = q;
-    const url = q ? `/partidos?equipo=${encodeURIComponent(q)}` : "/partidos";
-    startTransition(() => router.replace(url, { scroll: false }));
+    // Preserva el filtro de día (?dia=) y demás parámetros al navegar.
+    const params = new URLSearchParams(searchParams);
+    if (q) params.set("equipo", q);
+    else params.delete("equipo");
+    const qs = params.toString();
+    startTransition(() =>
+      router.replace(qs ? `/partidos?${qs}` : "/partidos", { scroll: false })
+    );
   }
 
   function onChange(next: string) {
