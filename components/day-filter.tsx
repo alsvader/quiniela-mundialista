@@ -13,17 +13,21 @@ export type DayOption = {
 };
 
 /**
- * Tira de días del calendario (spec match-schedule). El estado vive en la URL
- * (?dia=YYYY-MM-DD,…); la selección efectiva se resuelve SIEMPRE en servidor y
- * llega por `selected`, así que el cliente solo alterna tokens y navega —
- * nunca deriva fechas (sin drift de zona horaria).
+ * Tira de días del calendario (spec match-schedule). Selección de UN día a la
+ * vez: tocar un día reemplaza al anterior (control segmentado). La celda
+ * "Todos" muestra el torneo completo. Siempre hay exactamente una opción
+ * activa; no existe el estado "sin selección".
  *
- * Selección vacía = "Todos" (se navega a `?dia=` presente-vacío, no a la base,
- * para no caer en el día por defecto; ver day-filter.ts D3). `equipo` y
- * cualquier otro parámetro se preservan al navegar.
+ * El estado vive en la URL (?dia=YYYY-MM-DD); la selección efectiva se resuelve
+ * SIEMPRE en servidor y llega por `selected` (lista de 0 o 1 elemento), así que
+ * el cliente solo navega — nunca deriva fechas (sin drift de zona horaria).
+ * Día seleccionado → `?dia=<día>`; "Todos" → `?dia=` (presente-vacío, distinto
+ * de ausente, que sería el día por defecto). `equipo` y demás parámetros se
+ * preservan al navegar.
  *
- * `disabled` pausa la tira (atenuada, no interactiva) cuando hay una búsqueda
- * de equipo activa: esa búsqueda abarca todo el torneo y el día no aplica.
+ * Se modela con radios nativos (selección única, navegación por flechas y
+ * anuncio de lector de pantalla sin JS extra). `disabled` pausa la tira
+ * (atenuada, no interactiva) cuando hay una búsqueda de equipo activa.
  */
 export function DayFilter({
   days,
@@ -40,26 +44,26 @@ export function DayFilter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const order = days.map((d) => d.date);
 
   const selectedKey = selected.join(",");
-  const [active, setActive] = useState(selected);
+  // null = "Todos"; un día = esa fecha.
+  const [active, setActive] = useState<string | null>(selected[0] ?? null);
   const [pending, startTransition] = useTransition();
   // Última selección que navegó ESTE componente: distingue sus cambios de
-  // navegaciones externas (back/forward, otro filtro) para re-sincronizar.
+  // navegaciones externas (back/forward, búsqueda de equipo) para re-sincronizar.
   const lastSent = useRef(selectedKey);
 
   useEffect(() => {
     if (selectedKey !== lastSent.current) {
       lastSent.current = selectedKey;
-      setActive(selected);
+      setActive(selected[0] ?? null);
     }
   }, [selectedKey, selected]);
 
-  function apply(nextDays: string[]) {
-    const key = nextDays.join(",");
+  function select(day: string | null) {
+    const key = day ?? "";
     lastSent.current = key;
-    setActive(nextDays);
+    setActive(day);
     const params = new URLSearchParams(searchParams);
     // dia siempre presente: vacío ("Todos") es un estado distinto de ausente.
     params.set("dia", key);
@@ -69,19 +73,9 @@ export function DayFilter({
     );
   }
 
-  function toggle(date: string) {
-    const next = active.includes(date)
-      ? active.filter((d) => d !== date)
-      : [...active, date];
-    // conserva el orden del calendario
-    apply(order.filter((d) => next.includes(d)));
-  }
-
-  const showingAll = active.length === 0;
-
   return (
     <div
-      role="group"
+      role="radiogroup"
       aria-label="Filtrar por día"
       aria-busy={pending}
       aria-disabled={disabled || undefined}
@@ -90,29 +84,35 @@ export function DayFilter({
         [scrollbar-width:thin] [scrollbar-color:var(--color-outline-variant)_transparent]
         ${disabled ? "pointer-events-none opacity-45" : ""}`}
     >
-      <button
-        type="button"
-        aria-pressed={showingAll}
-        disabled={disabled}
-        onClick={() => apply([])}
-        className={cellClass(showingAll)}
-      >
+      <label className={cellClass(active === null)}>
+        <input
+          type="radio"
+          name="dia-filter"
+          className="sr-only"
+          checked={active === null}
+          disabled={disabled}
+          onChange={() => select(null)}
+        />
         <span className="label-data uppercase">Todos</span>
-      </button>
+      </label>
 
       {days.map((d) => {
-        const isSelected = active.includes(d.date);
+        const isSelected = active === d.date;
         const isToday = d.date === today;
         return (
-          <button
+          <label
             key={d.date}
-            type="button"
-            aria-pressed={isSelected}
-            aria-label={`${d.weekday} ${d.day}${isToday ? " (hoy)" : ""}`}
-            disabled={disabled}
-            onClick={() => toggle(d.date)}
             className={`${cellClass(isSelected)} snap-start flex-col gap-0.5`}
           >
+            <input
+              type="radio"
+              name="dia-filter"
+              className="sr-only"
+              checked={isSelected}
+              disabled={disabled}
+              onChange={() => select(d.date)}
+              aria-label={`${d.weekday} ${d.day}${isToday ? " (hoy)" : ""}`}
+            />
             <span
               className={`label-data uppercase ${
                 isSelected ? "text-on-primary-fixed-variant" : "text-on-surface-variant"
@@ -134,7 +134,7 @@ export function DayFilter({
                   : "bg-transparent"
               }`}
             />
-          </button>
+          </label>
         );
       })}
     </div>
@@ -145,10 +145,13 @@ export function DayFilter({
  * Celda de la tira: 44px+ táctil, ghost por defecto, relleno cian + glow al
  * seleccionar. `flex-1` + `min-w-14`: en desktop las celdas crecen para llenar
  * el ancho del contenedor; en móvil el piso de 56px fuerza el scroll horizontal.
+ * El radio interno es `sr-only`, así que el foco se refleja en la celda con
+ * `has-[:focus-visible]` (espeja el anillo de foco global).
  */
 function cellClass(selected: boolean): string {
-  return `inline-flex h-14 min-w-14 flex-1 items-center justify-center rounded-md border px-3
+  return `inline-flex h-14 min-w-14 flex-1 cursor-pointer items-center justify-center rounded-md border px-3
     transition-[color,background-color,border-color,box-shadow] duration-150 ease-(--ease-out-quart)
+    has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary-container has-[:focus-visible]:outline-offset-2
     ${
       selected
         ? "border-transparent bg-primary-container text-on-primary-fixed shadow-(--shadow-glow-primary)"
