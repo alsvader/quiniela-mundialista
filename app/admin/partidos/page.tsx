@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireAdminPage } from "@/lib/auth/guards";
 import { getJornadas } from "@/lib/queries";
 import { isMatchFinished, isMatchLive } from "@/lib/domain/jornada";
-import { formatJornadaDate, formatKickoffTime } from "@/lib/format";
+import {
+  filterJornadasByDays,
+  resolveSelectedDays,
+  todayInMexicoCity,
+} from "@/lib/domain/day-filter";
+import { formatDayChip, formatJornadaDate, formatKickoffTime } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
+import { DayFilter } from "@/components/day-filter";
 import { TeamFlag } from "@/components/team-flag";
 import { ScoreForm } from "./score-form";
 
@@ -17,9 +24,22 @@ export const metadata: Metadata = { title: "Partidos · Admin" };
  */
 const FINISH_REMINDER_MS = 2.5 * 60 * 60 * 1000;
 
-export default async function AdminPartidosPage() {
+export default async function AdminPartidosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ dia?: string }>;
+}) {
   await requireAdminPage();
+  const { dia } = await searchParams;
   const jornadas = await getJornadas();
+
+  // Filtro por día (spec match-schedule): misma tira que el participante; "hoy"
+  // y el default se resuelven en servidor (CDMX). Admin no tiene filtro de equipo.
+  const matchDates = [...jornadas.keys()];
+  const today = todayInMexicoCity();
+  const selectedDays = resolveSelectedDays(dia, matchDates, today);
+  const dayOptions = matchDates.map((date) => ({ date, ...formatDayChip(date) }));
+  const filteredJornadas = filterJornadasByDays(jornadas, selectedDays);
 
   return (
     <>
@@ -38,8 +58,19 @@ export default async function AdminPartidosPage() {
         partidos finalizados suman puntos. Corregir un marcador recalcula todo.
       </p>
 
+      <div className="mt-8">
+        <Suspense>
+          <DayFilter
+            days={dayOptions}
+            today={today}
+            selected={selectedDays}
+            basePath="/admin/partidos"
+          />
+        </Suspense>
+      </div>
+
       <div className="mt-8 flex flex-col gap-10">
-        {[...jornadas.entries()].map(([date, matches]) => (
+        {[...filteredJornadas.entries()].map(([date, matches]) => (
           <section key={date}>
             <h2 className="heading-display mb-3 text-lg">
               {formatJornadaDate(date)}
