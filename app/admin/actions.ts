@@ -6,6 +6,7 @@ import { AuthorizationError, requireAdmin } from "@/lib/auth/guards";
 import { toMxDate } from "@/lib/domain/jornada";
 import {
   matchSchema,
+  paymentInfoSchema,
   scoreSchema,
   userStatusSchema,
   whatsappSchema,
@@ -134,5 +135,42 @@ export async function saveWhatsapp(
   if (error) return { error: "No se pudo guardar el número." };
 
   revalidatePath("/admin/configuracion");
+  return { ok: true };
+}
+
+/** Datos de transferencia para el recordatorio de pago (spec admin-panel). */
+export async function savePaymentInfo(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const session = await admin();
+  if (!session) return { error: "Operación reservada al administrador." };
+
+  const parsed = paymentInfoSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: firstError(parsed.error) };
+
+  // RLS de app_settings solo permite UPDATE al admin (no INSERT): las llaves ya
+  // existen por seed/migración, así que actualizamos cada una como saveWhatsapp.
+  const now = new Date().toISOString();
+  const entries: [string, string][] = [
+    ["bank_name", parsed.data.bank_name],
+    ["bank_clabe", parsed.data.bank_clabe],
+    ["bank_holder", parsed.data.bank_holder],
+    ["payment_amount", parsed.data.payment_amount],
+  ];
+  const results = await Promise.all(
+    entries.map(([key, value]) =>
+      session.supabase
+        .from("app_settings")
+        .update({ value, updated_at: now })
+        .eq("key", key)
+    )
+  );
+  if (results.some((r) => r.error)) {
+    return { error: "No se pudieron guardar los datos de pago." };
+  }
+
+  revalidatePath("/admin/configuracion");
+  revalidatePath("/admin/usuarios");
   return { ok: true };
 }

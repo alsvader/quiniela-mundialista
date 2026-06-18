@@ -152,3 +152,25 @@ export const whatsappSchema = z.object({
       "Escribe un número de 10 dígitos (o con código de país)."
     ),
 });
+
+// Datos de transferencia para el recordatorio de pago (design.md D1/D5).
+// Los campos pueden quedar vacíos al guardar: la completitud se valida en el
+// punto de uso (buildPaymentReminderLink), no aquí.
+export const paymentInfoSchema = z.object({
+  bank_name: z.string().trim().max(60, "Nombre de banco demasiado largo."),
+  bank_clabe: z
+    .string()
+    .transform((s) => s.replace(/\D/g, ""))
+    .refine(
+      (s) => s === "" || /^\d{18}$/.test(s),
+      "La CLABE debe tener 18 dígitos (o déjala vacía)."
+    ),
+  bank_holder: z.string().trim().max(80, "Nombre del titular demasiado largo."),
+  payment_amount: z
+    .string()
+    .trim()
+    .refine(
+      (s) => s === "" || (/^\d+(\.\d{1,2})?$/.test(s) && Number(s) >= 0),
+      "Monto inválido (número positivo, ej. 200 o 200.50)."
+    ),
+});
