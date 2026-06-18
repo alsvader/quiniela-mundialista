@@ -12,3 +12,30 @@ export function buildWhatsappLink(
     `Correo: ${user.email}\nTeléfono: ${user.phone}`;
   return `https://wa.me/${full}?text=${encodeURIComponent(text)}`;
 }
+
+/**
+ * Deep link admin → usuario para recordar el pago (change recordatorio-pago-whatsapp,
+ * design.md D2/D6). Dirigido al teléfono del usuario con bienvenida, monto y datos
+ * de transferencia prellenados. Devuelve null si falta el teléfono o cualquier dato
+ * de transferencia: el botón usa ese null para deshabilitarse.
+ */
+export function buildPaymentReminderLink(
+  userPhone: string,
+  user: { name: string },
+  bank: { bankName: string; clabe: string; holder: string; amount: string }
+): string | null {
+  const digits = userPhone.replace(/\D/g, "");
+  if (!digits) return null;
+  if (!bank.bankName || !bank.clabe || !bank.holder || !bank.amount) return null;
+
+  // Números de 10 dígitos se asumen mexicanos (+52)
+  const full = digits.length === 10 ? `52${digits}` : digits;
+  const text =
+    `¡Hola ${user.name}! 🏆 Te damos la bienvenida a la Quiniela Mundialista.\n` +
+    `Para activar tu cuenta realiza tu pago de $${bank.amount} por transferencia:\n` +
+    `• Banco: ${bank.bankName}\n` +
+    `• CLABE: ${bank.clabe}\n` +
+    `• A nombre de: ${bank.holder}\n` +
+    `Cuando transfieras, mándame tu comprobante por aquí y activo tu cuenta. ¡Suerte! ⚽`;
+  return `https://wa.me/${full}?text=${encodeURIComponent(text)}`;
+}

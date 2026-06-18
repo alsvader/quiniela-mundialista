@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { requireAdminPage } from "@/lib/auth/guards";
+import { getPaymentInfo } from "@/lib/queries";
+import { buildPaymentReminderLink } from "@/lib/whatsapp";
 import { formatDateTime } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
 import type { Profile } from "@/lib/types";
 import { UserStatusButton } from "./user-status-button";
+import { PaymentReminderButton } from "./payment-reminder-button";
 
 export const metadata: Metadata = { title: "Usuarios · Admin" };
 
@@ -16,13 +19,14 @@ const STATUS_LABEL = {
 export default async function UsuariosPage() {
   const { supabase } = await requireAdminPage();
 
-  const [{ data: profiles }, { data: emails }] = await Promise.all([
+  const [{ data: profiles }, { data: emails }, payment] = await Promise.all([
     supabase
       .from("profiles")
       .select("*")
       .eq("role", "user")
       .order("created_at", { ascending: false }),
     supabase.rpc("admin_user_emails"),
+    getPaymentInfo(),
   ]);
 
   const emailById = new Map(
@@ -82,6 +86,22 @@ export default async function UsuariosPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex gap-2">
+                        {u.status === "pending" && (
+                          <PaymentReminderButton
+                            link={
+                              buildPaymentReminderLink(
+                                u.phone,
+                                { name: u.full_name },
+                                payment
+                              )
+                            }
+                            disabledHint={
+                              !u.phone
+                                ? "El usuario no tiene teléfono registrado."
+                                : "Completa los datos de transferencia en Configuración."
+                            }
+                          />
+                        )}
                         {u.status !== "active" && (
                           <UserStatusButton
                             userId={u.id}

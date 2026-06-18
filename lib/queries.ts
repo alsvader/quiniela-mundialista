@@ -48,6 +48,35 @@ export async function getWhatsappNumber(): Promise<string> {
   return data?.value ?? "";
 }
 
+export interface PaymentInfo {
+  bankName: string;
+  clabe: string;
+  holder: string;
+  amount: string;
+}
+
+/**
+ * Datos de transferencia para el recordatorio de pago (design.md D1).
+ * Solo se consultan desde páginas admin (requireAdminPage); RLS limita la
+ * escritura al admin y la lectura a sesiones autenticadas.
+ */
+export async function getPaymentInfo(): Promise<PaymentInfo> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("app_settings")
+    .select("key, value")
+    .in("key", ["bank_name", "bank_clabe", "bank_holder", "payment_amount"]);
+  const byKey = new Map(
+    ((data ?? []) as { key: string; value: string }[]).map((r) => [r.key, r.value])
+  );
+  return {
+    bankName: byKey.get("bank_name") ?? "",
+    clabe: byKey.get("bank_clabe") ?? "",
+    holder: byKey.get("bank_holder") ?? "",
+    amount: byKey.get("payment_amount") ?? "",
+  };
+}
+
 export interface RankingRow {
   alias: string;
   points: number;
