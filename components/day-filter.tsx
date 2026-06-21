@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export type DayOption = {
@@ -53,12 +53,37 @@ export function DayFilter({
   // navegaciones externas (back/forward, búsqueda de equipo) para re-sincronizar.
   const lastSent = useRef(selectedKey);
 
+  // Tira scrollable + celda objetivo (la activa, o la de hoy si está "Todos").
+  const containerRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLLabelElement | null>(null);
+  // Centrar solo al montar y al re-sincronizar por navegación externa; nunca en
+  // los taps del usuario (la celda tocada ya estaba visible). Arranca en true
+  // para posicionar al montar.
+  const shouldCenter = useRef(true);
+
   useEffect(() => {
     if (selectedKey !== lastSent.current) {
       lastSent.current = selectedKey;
+      shouldCenter.current = true;
       setActive(selected[0] ?? null);
     }
   }, [selectedKey, selected]);
+
+  // Posiciona el scroll horizontal del contenedor para centrar la celda
+  // objetivo. El navegador acota scrollLeft a [0, scrollWidth - clientWidth],
+  // así que una celda en un extremo queda completamente visible sin scroll
+  // vacío. Toca SOLO el eje horizontal del contenedor: no mueve el scroll
+  // vertical de la página. useLayoutEffect fija la posición antes del paint
+  // para evitar el parpadeo "ver 0 → salta al centro".
+  useLayoutEffect(() => {
+    if (!shouldCenter.current) return;
+    shouldCenter.current = false;
+    const container = containerRef.current;
+    const cell = targetRef.current;
+    if (!container || !cell) return;
+    container.scrollLeft =
+      cell.offsetLeft - (container.clientWidth - cell.clientWidth) / 2;
+  }, [active]);
 
   function select(day: string | null) {
     const key = day ?? "";
@@ -75,6 +100,7 @@ export function DayFilter({
 
   return (
     <div
+      ref={containerRef}
       role="radiogroup"
       aria-label="Filtrar por día"
       aria-busy={pending}
@@ -99,9 +125,14 @@ export function DayFilter({
       {days.map((d) => {
         const isSelected = active === d.date;
         const isToday = d.date === today;
+        // Objetivo del centrado: el día seleccionado; si está "Todos", hoy.
+        const isTarget = isSelected || (active === null && isToday);
         return (
           <label
             key={d.date}
+            ref={(el) => {
+              if (isTarget) targetRef.current = el;
+            }}
             className={`${cellClass(isSelected)} snap-start flex-col gap-0.5`}
           >
             <input
