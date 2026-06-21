@@ -180,7 +180,7 @@ export function DayFilter({
  * `has-[:focus-visible]` (espeja el anillo de foco global).
  */
 function cellClass(selected: boolean): string {
-  return `inline-flex h-14 min-w-14 flex-1 cursor-pointer items-center justify-center rounded-md border px-3
+  return `relative inline-flex h-14 min-w-14 flex-1 cursor-pointer items-center justify-center rounded-md border px-3
     transition-[color,background-color,border-color,box-shadow] duration-150 ease-(--ease-out-quart)
     has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary-container has-[:focus-visible]:outline-offset-2
     ${
