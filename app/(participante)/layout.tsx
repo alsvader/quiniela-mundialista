@@ -47,7 +47,7 @@ export default async function ParticipanteLayout({
     "rounded px-3 py-2 text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors duration-150";
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       {profile.status === "pending" && (
         <PendingBanner whatsappLink={whatsappLink} nextKickoff={nextKickoff} />
       )}
