@@ -17,7 +17,7 @@ export default async function AdminLayout({
   await requireAdminPage();
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <header className="sticky top-0 z-(--z-sticky) border-b border-outline-variant/40 bg-surface/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-5 py-3">
           <Link
