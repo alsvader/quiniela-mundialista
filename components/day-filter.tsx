@@ -110,7 +110,7 @@ export function DayFilter({
         [scrollbar-width:thin] [scrollbar-color:var(--color-outline-variant)_transparent]
         ${disabled ? "pointer-events-none opacity-45" : ""}`}
     >
-      <label className={cellClass(active === null)}>
+      <label className={`${cellClass(active === null)} snap-start`}>
         <input
           type="radio"
           name="dia-filter"
