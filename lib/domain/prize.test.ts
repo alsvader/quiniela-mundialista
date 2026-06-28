@@ -106,6 +106,14 @@ describe("prizeDistribution (ponderado 50/30/20, posiciones ocupadas)", () => {
   });
 });
 
+describe("bolsas independientes por temporada", () => {
+  it("cada temporada deriva su propio pool de su propio conteo", () => {
+    // grupos con 20 activos, eliminatoria con 8: pools separados, misma regla
+    expect(prizePool(20)).toBe(1400);
+    expect(prizePool(8)).toBe(560);
+  });
+});
+
 describe("formatMxn", () => {
   it("enteros sin centavos, fracciones con dos", () => {
     expect(formatMxn(700)).toBe("$700");

@@ -5,9 +5,11 @@ import { redirect } from "next/navigation";
 import { AuthorizationError, requireAdmin } from "@/lib/auth/guards";
 import { toMxDate } from "@/lib/domain/jornada";
 import {
+  faseActivaSchema,
   matchSchema,
   paymentInfoSchema,
   scoreSchema,
+  seasonParticipationSchema,
   userStatusSchema,
   whatsappSchema,
 } from "@/lib/schemas";
@@ -47,6 +49,63 @@ export async function setUserStatus(
   if (error) return { error: "No se pudo actualizar el estado." };
 
   revalidatePath("/admin/usuarios");
+  return { ok: true };
+}
+
+/**
+ * Confirmar o retirar la participación de un usuario en una temporada
+ * (change fase-eliminatoria-temporada, specs account-activation/admin-panel).
+ * `active` = pago confirmado; `disabled` = participación retirada (reversible,
+ * conserva pronósticos). Upsert idempotente de la fila (user_id, temporada).
+ */
+export async function setSeasonParticipation(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const session = await admin();
+  if (!session) return { error: "Operación reservada al administrador." };
+
+  const parsed = seasonParticipationSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: firstError(parsed.error) };
+  const { user_id, temporada, status } = parsed.data;
+
+  const { error } = await session.supabase
+    .from("participaciones")
+    .upsert(
+      { user_id, temporada, status },
+      { onConflict: "user_id,temporada" }
+    );
+  if (error) return { error: "No se pudo actualizar la participación." };
+
+  // La participación mueve bolsa y ranking (derivados) de esa temporada.
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/ranking");
+  revalidatePath("/ranking");
+  revalidatePath("/partidos");
+  return { ok: true };
+}
+
+/** Mover la temporada activa (puntero de onboarding: pestaña por defecto y CTA). */
+export async function setFaseActiva(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  const session = await admin();
+  if (!session) return { error: "Operación reservada al administrador." };
+
+  const parsed = faseActivaSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: firstError(parsed.error) };
+
+  const { error } = await session.supabase
+    .from("app_settings")
+    .update({ value: parsed.data.fase_activa, updated_at: new Date().toISOString() })
+    .eq("key", "fase_activa");
+  if (error) return { error: "No se pudo cambiar la temporada activa." };
+
+  revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/configuracion");
+  revalidatePath("/partidos");
+  revalidatePath("/ranking");
   return { ok: true };
 }
 

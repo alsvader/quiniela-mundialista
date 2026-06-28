@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Volcados de base de datos (pueden contener PII de producción): nunca commitear
+backups/

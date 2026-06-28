@@ -74,6 +74,21 @@ export const userStatusSchema = z.object({
   status: z.enum(["active", "disabled", "pending"], "Solicitud inválida."),
 });
 
+// Temporada (change fase-eliminatoria-temporada): unidad de pago/bolsa/ranking.
+export const temporadaSchema = z.enum(["grupos", "eliminatoria"], "Temporada inválida.");
+
+// Confirmar/retirar la participación de un usuario en una temporada.
+export const seasonParticipationSchema = z.object({
+  user_id: z.uuid("Solicitud inválida."),
+  temporada: temporadaSchema,
+  status: z.enum(["active", "disabled"], "Solicitud inválida."),
+});
+
+// Mover la temporada activa (puntero de onboarding: pestaña por defecto y CTA).
+export const faseActivaSchema = z.object({
+  fase_activa: temporadaSchema,
+});
+
 const goals = z.coerce
   .number("Marcador inválido: goles enteros de 0 a 99.")
   .int("Marcador inválido: goles enteros de 0 a 99.")

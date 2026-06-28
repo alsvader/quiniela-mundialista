@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Match, Prediction } from "@/lib/types";
+import { toTemporada, type Temporada } from "@/lib/domain/temporada";
 
 /** Partidos de fase de grupos agrupados por jornada (match_date asc, kickoff asc). */
 export async function getJornadas(): Promise<Map<string, Match[]>> {
@@ -82,25 +83,64 @@ export interface RankingRow {
   points: number;
 }
 
-export async function getRanking(): Promise<RankingRow[]> {
+/** Ranking de una temporada (RPC `ranking(temp)`, security definer). */
+export async function getRanking(temporada: Temporada): Promise<RankingRow[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("ranking");
+  const { data, error } = await supabase.rpc("ranking", { temp: temporada });
   if (error) throw new Error(`Error cargando ranking: ${error.message}`);
   return (data ?? []) as RankingRow[];
 }
 
 /**
- * Número de participantes activos (base de la bolsa, design.md D11).
- * Se cuenta sobre la función `ranking()` (security definer): expone
- * exactamente a los activos con rol participante y es legible para
- * cualquier sesión, a diferencia de `profiles` que RLS restringe.
+ * Número de participantes activos de una temporada (base de la bolsa de esa
+ * temporada, design.md D11 + change fase-eliminatoria-temporada). Se cuenta
+ * sobre la función `ranking(temp)` (security definer): expone exactamente a los
+ * participantes activos de la temporada y es legible para cualquier sesión, a
+ * diferencia de `participaciones`/`profiles` que RLS restringe.
  */
-export async function getActiveParticipantCount(): Promise<number> {
+export async function getActiveParticipantCount(
+  temporada: Temporada
+): Promise<number> {
   const supabase = await createClient();
-  const { count, error } = await supabase.rpc("ranking", undefined, {
-    count: "exact",
-    head: true,
-  });
+  const { count, error } = await supabase.rpc(
+    "ranking",
+    { temp: temporada },
+    { count: "exact", head: true }
+  );
   if (error) throw new Error(`Error contando activos: ${error.message}`);
   return count ?? 0;
+}
+
+/** Temporada activa (puntero de onboarding); default seguro `grupos`. */
+export async function getFaseActiva(): Promise<Temporada> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", "fase_activa")
+    .maybeSingle();
+  return toTemporada(data?.value);
+}
+
+/**
+ * Temporadas en las que participa (active) el usuario autenticado. RLS limita
+ * la lectura de `participaciones` a las filas propias (o admin).
+ */
+export async function getMyParticipations(): Promise<Set<Temporada>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return new Set();
+  const { data, error } = await supabase
+    .from("participaciones")
+    .select("temporada, status")
+    .eq("user_id", user.id)
+    .eq("status", "active");
+  if (error) throw new Error(`Error cargando participaciones: ${error.message}`);
+  const set = new Set<Temporada>();
+  for (const row of (data ?? []) as { temporada: string }[]) {
+    set.add(toTemporada(row.temporada));
+  }
+  return set;
 }

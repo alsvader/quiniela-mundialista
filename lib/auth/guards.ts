@@ -34,16 +34,18 @@ export async function requireSession() {
   return session;
 }
 
-/** Para Server Actions de pronósticos: exige cuenta activa. */
-export async function requireActiveUser() {
+/**
+ * Para Server Actions de pronósticos (change fase-eliminatoria-temporada): el
+ * permiso de pronosticar ya NO se deriva del estado global de la cuenta sino de
+ * la participación por temporada (la valida `savePick` contra `participaciones`,
+ * con la RLS como última línea). Aquí solo exigimos sesión y que la cuenta no
+ * esté `disabled` (baneo de toda la cuenta). Una cuenta `pending` puede haber
+ * pagado una temporada (p. ej. quien entra directo a la eliminatoria).
+ */
+export async function requireEnabledAccount() {
   const session = await getSessionProfile();
   if (!session) {
     throw new AuthorizationError("Inicia sesión para continuar.");
-  }
-  if (session.profile.status === "pending") {
-    throw new AuthorizationError(
-      "Tu cuenta está pendiente de pago. Actívala para guardar pronósticos."
-    );
   }
   if (session.profile.status === "disabled") {
     throw new AuthorizationError(

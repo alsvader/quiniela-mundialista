@@ -3,7 +3,9 @@ import { Suspense } from "react";
 import { requireSession } from "@/lib/auth/guards";
 import {
   getActiveParticipantCount,
+  getFaseActiva,
   getJornadas,
+  getMyParticipations,
   getMyPredictions,
   getWhatsappNumber,
 } from "@/lib/queries";
@@ -15,8 +17,14 @@ import {
   resolveSelectedDays,
   todayInMexicoCity,
 } from "@/lib/domain/day-filter";
+import {
+  filterJornadasByTemporada,
+  isTemporada,
+  temporadaLabel,
+} from "@/lib/domain/temporada";
 import { prizePool } from "@/lib/domain/prize";
 import { PrizePoolCard } from "@/components/prize-pool-card";
+import { SeasonTabs } from "@/components/season-tabs";
 import { DayFilter } from "@/components/day-filter";
 import { LiveMatchCard } from "./live-match-card";
 import { LiveRefresher } from "./live-refresher";
@@ -40,22 +48,32 @@ export const metadata: Metadata = { title: "Partidos" };
 export default async function PartidosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ equipo?: string; dia?: string }>;
+  searchParams: Promise<{ equipo?: string; dia?: string; temporada?: string }>;
 }) {
   const { user, profile } = await requireSession();
-  const { equipo, dia } = await searchParams;
+  const { equipo, dia, temporada: temporadaParam } = await searchParams;
   const query = (equipo ?? "").trim();
-  const [jornadas, predictions, activeCount] = await Promise.all([
-    getJornadas(),
-    getMyPredictions(),
-    getActiveParticipantCount(),
-  ]);
+  const [allJornadas, predictions, faseActiva, participaciones] =
+    await Promise.all([
+      getJornadas(),
+      getMyPredictions(),
+      getFaseActiva(),
+      getMyParticipations(),
+    ]);
 
-  const canEdit = profile.status === "active";
+  // Temporada vista: la de la URL (validada) o, por defecto, la fase activa.
+  const temporada = isTemporada(temporadaParam) ? temporadaParam : faseActiva;
+  const activeCount = await getActiveParticipantCount(temporada);
+
+  // El calendario se acota a la temporada seleccionada; el gate de edición es la
+  // participación en ESA temporada (change fase-eliminatoria-temporada).
+  const jornadas = filterJornadasByTemporada(allJornadas, temporada);
+  const participaEnTemporada = participaciones.has(temporada);
+  const canEdit = participaEnTemporada;
 
   // En vivo = ya arrancó y el admin no lo ha finalizado (spec live-match).
   // getJornadas ordena por fecha, kickoff e id: orden estable en simultáneos.
-  // Los vivos se calculan SIN filtrar: el header es independiente del filtro.
+  // Los vivos se calculan SIN filtrar (por día/equipo) pero SÍ por temporada.
   const liveMatches = [...jornadas.values()].flat().filter((m) => isMatchLive(m));
 
   // Filtro por día (spec match-schedule): la tira se arma con TODAS las fechas
@@ -83,11 +101,13 @@ export default async function PartidosPage({
     ? jornadaEntries.reduce((n, [, matches]) => n + matches.length, 0)
     : null;
 
+  // El modal de pago se rige por la participación en la fase activa, no por el
+  // estado global de la cuenta (change fase-eliminatoria-temporada).
   let modal: React.ReactNode = null;
-  if (profile.status === "pending") {
+  if (profile.status !== "disabled" && !participaciones.has(faseActiva)) {
     const number = await getWhatsappNumber();
-    // próximo partido aún abierto (getJornadas ordena por fecha y kickoff)
-    const next = [...jornadas.values()]
+    // próximo partido aún abierto de la fase activa
+    const next = [...filterJornadasByTemporada(allJornadas, faseActiva).values()]
       .flat()
       .find((m) => isMatchOpen(m.kickoff_at));
     modal = (
@@ -108,6 +128,15 @@ export default async function PartidosPage({
     <>
       {modal}
       {liveMatches.length > 0 && <LiveRefresher />}
+      <div className="mb-6">
+        <Suspense>
+          <SeasonTabs
+            selected={temporada}
+            basePath="/partidos"
+            resetParams={["dia", "equipo"]}
+          />
+        </Suspense>
+      </div>
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div>
           <h1 className="heading-display text-3xl sm:text-4xl">Partidos</h1>
@@ -131,27 +160,31 @@ export default async function PartidosPage({
         </div>
       )}
 
-      {/* los filtros viven pegados al listado que controlan; los vivos quedan fuera */}
-      <div className="mt-8 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {/* los filtros viven pegados al listado que controlan; los vivos quedan
+          fuera. Sin partidos en la temporada no hay nada que filtrar: el bloque
+          se omite (si no, "Todos" quedaría solo, estirado a todo el ancho). */}
+      {dayOptions.length > 0 && (
+        <div className="mt-8 flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Suspense>
+              <TeamFilter />
+            </Suspense>
+            <p aria-live="polite" className="label-data text-on-surface-variant">
+              {filteredCount !== null &&
+                `${filteredCount} ${filteredCount === 1 ? "partido" : "partidos"} de «${query}»`}
+            </p>
+          </div>
           <Suspense>
-            <TeamFilter />
+            <DayFilter
+              days={dayOptions}
+              today={today}
+              selected={daySelection}
+              basePath="/partidos"
+              disabled={teamSearching}
+            />
           </Suspense>
-          <p aria-live="polite" className="label-data text-on-surface-variant">
-            {filteredCount !== null &&
-              `${filteredCount} ${filteredCount === 1 ? "partido" : "partidos"} de «${query}»`}
-          </p>
         </div>
-        <Suspense>
-          <DayFilter
-            days={dayOptions}
-            today={today}
-            selected={daySelection}
-            basePath="/partidos"
-            disabled={teamSearching}
-          />
-        </Suspense>
-      </div>
+      )}
 
       {filteredCount === 0 && (
         <div className="glass mt-6 max-w-prose p-6 text-sm text-on-surface-variant">
@@ -168,6 +201,19 @@ export default async function PartidosPage({
           >
             Limpiar filtro
           </Link>
+        </div>
+      )}
+
+      {jornadas.size === 0 && (
+        <div className="glass mt-6 max-w-prose p-6 text-sm text-on-surface-variant">
+          <p className="font-semibold text-on-surface">
+            La fase de {temporadaLabel(temporada).toLowerCase()} aún no tiene
+            partidos.
+          </p>
+          <p className="mt-1">
+            En cuanto el administrador cargue el calendario de esta fase
+            aparecerá aquí.
+          </p>
         </div>
       )}
 
@@ -196,9 +242,15 @@ export default async function PartidosPage({
 
               {openCount > 0 && !canEdit && (
                 <p className="mb-3 text-sm font-semibold text-secondary-fixed">
-                  {profile.status === "pending"
-                    ? "Activa tu cuenta para pronosticar los partidos abiertos."
-                    : "Tu cuenta está desactivada: no puedes pronosticar."}
+                  {profile.status === "disabled"
+                    ? "Tu cuenta está desactivada: no puedes pronosticar."
+                    : temporada === faseActiva
+                      ? `Aún no entras a la fase de ${temporadaLabel(
+                          temporada
+                        ).toLowerCase()}: paga para pronosticar los partidos abiertos.`
+                      : `Solo lectura — tu quiniela está en la fase de ${temporadaLabel(
+                          faseActiva
+                        ).toLowerCase()}.`}
                 </p>
               )}
               <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 p-0">

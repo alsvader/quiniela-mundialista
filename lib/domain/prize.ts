@@ -9,6 +9,12 @@
  * se renormalizan. Se acepta el "minus pool": un empate en la porción menor
  * puede pagar menos que el boleto.
  * El pago es manual fuera de la app: aquí solo se calcula y muestra.
+ *
+ * Por temporada (change fase-eliminatoria-temporada): estas funciones son
+ * puras sobre conteos/puntos, así que cada temporada (grupos / eliminatoria)
+ * usa las MISMAS reglas sobre su propio pool — basta invocarlas con el conteo
+ * de activos y los puntos de esa temporada (ver getActiveParticipantCount y
+ * getRanking parametrizados por temporada en lib/queries.ts).
  */
 
 export const ENTRY_FEE_MXN = 100;

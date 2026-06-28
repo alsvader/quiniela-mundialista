@@ -49,3 +49,19 @@ export interface Prediction {
   pick: Pick;
   updated_at: string;
 }
+
+/** Estado de una participación por temporada (active = pago confirmado). */
+export type ParticipacionStatus = "active" | "disabled";
+
+/**
+ * Entitlement por temporada (change fase-eliminatoria-temporada): la ausencia
+ * de fila significa que el usuario no participa en esa temporada. La temporada
+ * se modela como string ("grupos" | "eliminatoria"); el tipo canónico vive en
+ * lib/domain/temporada.ts.
+ */
+export interface Participacion {
+  user_id: string;
+  temporada: string;
+  status: ParticipacionStatus;
+  created_at: string;
+}

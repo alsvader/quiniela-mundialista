@@ -1,22 +1,41 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { requireSession } from "@/lib/auth/guards";
-import { getJornadas, getMyPredictions } from "@/lib/queries";
+import {
+  getFaseActiva,
+  getJornadas,
+  getMyPredictions,
+} from "@/lib/queries";
 import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
 import { isMatchFinished } from "@/lib/domain/jornada";
+import {
+  filterJornadasByTemporada,
+  isTemporada,
+  temporadaLabel,
+} from "@/lib/domain/temporada";
 import { formatJornadaDate } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
+import { SeasonTabs } from "@/components/season-tabs";
 import { TeamFlag } from "@/components/team-flag";
 
 export const metadata: Metadata = { title: "Mis puntos" };
 
 const PICK_SHORT: Record<Pick, string> = { H: "L", D: "E", A: "V" };
 
-export default async function MisPuntosPage() {
+export default async function MisPuntosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ temporada?: string }>;
+}) {
   await requireSession();
-  const [jornadas, predictions] = await Promise.all([
+  const { temporada: temporadaParam } = await searchParams;
+  const [allJornadas, predictions, faseActiva] = await Promise.all([
     getJornadas(),
     getMyPredictions(),
+    getFaseActiva(),
   ]);
+  const temporada = isTemporada(temporadaParam) ? temporadaParam : faseActiva;
+  const jornadas = filterJornadasByTemporada(allJornadas, temporada);
 
   const allMatches = [...jornadas.values()].flat();
   // solo los finalizados puntúan: un marcador parcial en vivo no cuenta aquí
@@ -35,6 +54,15 @@ export default async function MisPuntosPage() {
   return (
     <>
       <h1 className="heading-display text-3xl sm:text-4xl">Mis puntos</h1>
+      <p className="mt-2 text-sm text-on-surface-variant">
+        Fase de {temporadaLabel(temporada).toLowerCase()}
+      </p>
+
+      <div className="mt-5">
+        <Suspense>
+          <SeasonTabs selected={temporada} basePath="/mis-puntos" />
+        </Suspense>
+      </div>
 
       <div className="glass mt-6 inline-flex items-baseline gap-4 px-8 py-6">
         <span className="font-mono text-6xl font-medium text-primary-container [text-shadow:0_0_24px_rgb(0_243_255/0.35)]">

@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs",
+    "seed:test-users": "node --env-file=.env.local scripts/seed-test-users.mjs",
     "smoke": "node --env-file=.env.local scripts/smoke-test.mjs"
   },
   "dependencies": {
