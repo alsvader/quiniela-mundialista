@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AuthorizationError, requireAdmin } from "@/lib/auth/guards";
 import { toMxDate } from "@/lib/domain/jornada";
+import { temporadaDeFase } from "@/lib/domain/temporada";
+import type { MatchPhase } from "@/lib/types";
 import {
   faseActivaSchema,
   matchSchema,
@@ -119,7 +121,37 @@ export async function saveScore(
 
   const parsed = scoreSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: firstError(parsed.error) };
-  const { match_id, home_goals, away_goals, finished } = parsed.data;
+  const { match_id, home_goals, away_goals, finished, avanza } = parsed.data;
+
+  // La temporada se resuelve desde la fase real del partido (no del cliente).
+  const { data: match, error: matchError } = await session.supabase
+    .from("matches")
+    .select("phase")
+    .eq("id", match_id)
+    .maybeSingle<{ phase: MatchPhase }>();
+  if (matchError || !match) return { error: "No se pudo cargar el partido." };
+
+  // En eliminatoria el resultado oficial es "quién avanza": con goles distintos
+  // se deduce del marcador (y no puede contradecir al admin); con empate lo
+  // elige el admin (penales). En grupos siempre queda null (change
+  // eliminatoria-quien-avanza). El CHECK de BD es la última línea.
+  let avanzaToSave: "H" | "A" | null = null;
+  if (temporadaDeFase(match.phase) === "eliminatoria") {
+    if (home_goals !== away_goals) {
+      const deduced = home_goals > away_goals ? "H" : "A";
+      if (avanza && avanza !== deduced) {
+        return { error: "Quién avanza no coincide con el marcador capturado." };
+      }
+      avanzaToSave = deduced;
+    } else {
+      avanzaToSave = avanza ?? null; // empate: ganador por penales lo pone el admin
+    }
+    if (finished && !avanzaToSave) {
+      return {
+        error: "Define quién avanza (penales) para finalizar este partido.",
+      };
+    }
+  }
 
   // Sin checkbox el partido queda (o vuelve a) no finalizado: la reversa para
   // correcciones es el mismo gesto (spec live-match). Solo finalizados puntúan.
@@ -128,6 +160,7 @@ export async function saveScore(
     .update({
       home_goals,
       away_goals,
+      avanza: avanzaToSave,
       finished_at: finished ? new Date().toISOString() : null,
     })
     .eq("id", match_id);

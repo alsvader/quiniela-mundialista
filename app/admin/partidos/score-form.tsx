@@ -12,12 +12,22 @@ export function ScoreForm({
   homeGoals,
   awayGoals,
   finished,
+  eliminatoria = false,
+  homeTeam,
+  awayTeam,
+  avanza = null,
 }: {
   matchId: number;
   homeGoals: number | null;
   awayGoals: number | null;
   /** Estado actual: inicializa el checkbox para no des-finalizar por accidente */
   finished: boolean;
+  /** Eliminatoria: además del marcador, se captura quién avanza (sin empate). */
+  eliminatoria?: boolean;
+  homeTeam?: string;
+  awayTeam?: string;
+  /** Quién avanza actual (H/A) o null si aún sin definir. */
+  avanza?: "H" | "A" | null;
 }) {
   const [state, action, pending] = useActionState<AdminState, FormData>(
     saveScore,
@@ -25,7 +35,7 @@ export function ScoreForm({
   );
 
   return (
-    <form action={action} className="flex items-center gap-2">
+    <form action={action} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="match_id" value={matchId} />
       <label className="sr-only" htmlFor={`hg-${matchId}`}>
         Goles del local
@@ -54,6 +64,20 @@ export function ScoreForm({
         defaultValue={awayGoals ?? ""}
         className={scoreInput}
       />
+      {eliminatoria && (
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant">
+          Avanza
+          <select
+            name="avanza"
+            defaultValue={avanza ?? ""}
+            className="h-9 rounded bg-white/6 px-2 text-sm text-on-surface border-b border-primary-container/50 focus:border-primary-container focus:outline-none"
+          >
+            <option value="">—</option>
+            <option value="H">{homeTeam ?? "Local"}</option>
+            <option value="A">{awayTeam ?? "Visitante"}</option>
+          </select>
+        </label>
+      )}
       <label className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-semibold text-on-surface-variant">
         <input
           type="checkbox"

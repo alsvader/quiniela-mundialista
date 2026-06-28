@@ -41,6 +41,12 @@ export interface Match {
   away_goals: number | null;
   /** Finalización explícita del admin (live-match); null = no finalizado */
   finished_at: string | null;
+  /**
+   * Quién avanza en eliminatoria (H = local, A = visitante); null en grupos o
+   * sin definir. En eliminatoria es el resultado oficial (un 1-1 por penales no
+   * se deriva de los goles). Ver change eliminatoria-quien-avanza.
+   */
+  avanza: Pick | null;
 }
 
 export interface Prediction {

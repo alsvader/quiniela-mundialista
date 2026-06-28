@@ -1,7 +1,8 @@
 import { Chip } from "@/components/ui/chip";
 import { TeamFlag } from "@/components/team-flag";
-import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
+import { officialResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
 import { isMatchFinished, isMatchLive } from "@/lib/domain/jornada";
+import { temporadaDeFase } from "@/lib/domain/temporada";
 import type { Match } from "@/lib/types";
 
 const PICK_LABEL: Record<Pick, string> = {
@@ -28,14 +29,28 @@ export function ClosedMatchCard({
   const hasScore = match.home_goals !== null && match.away_goals !== null;
   const finished = isMatchFinished(match);
   const live = isMatchLive(match);
-  const result =
-    hasScore ? deriveResult(match.home_goals!, match.away_goals!) : null;
+  const temporada = temporadaDeFase(match.phase);
+  const eliminatoria = temporada === "eliminatoria";
+  // Resultado oficial por temporada: grupos = goles; eliminatoria = quién avanza
+  // (un 1-1 por penales no se deriva de los goles). Puede ser null si no está
+  // determinado (sin goles, o eliminatoria sin "avanza" definido).
+  const result = officialResult(
+    temporada,
+    match.home_goals,
+    match.away_goals,
+    match.avanza
+  );
+  // equipo que avanza (eliminatoria resuelta), para mostrarlo como contexto
+  const advancingTeam =
+    eliminatoria && match.avanza
+      ? match.avanza === "H"
+        ? match.home_team
+        : match.away_team
+      : null;
   // "Estadio · Ciudad"; se omite la línea si la sede no está capturada
   const venue = [match.stadium, match.city].filter(Boolean).join(" · ");
   // tu check: solo los finalizados puntúan; un parcial jamás suma
-  const point = finished
-    ? scorePrediction(pick, match.home_goals!, match.away_goals!)
-    : null;
+  const point = finished ? scorePrediction(pick, result) : null;
 
   return (
     <li className="glass group p-4">
@@ -84,11 +99,23 @@ export function ClosedMatchCard({
         </p>
       )}
 
+      {advancingTeam && (
+        <p className="label-data mt-2 text-tertiary-fixed">
+          Avanza {advancingTeam}
+        </p>
+      )}
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 pt-3 text-sm">
         <span className="text-on-surface-variant">
           Tu pronóstico:{" "}
           {pick ? (
-            <strong className="text-on-surface">{PICK_LABEL[pick]}</strong>
+            <strong className="text-on-surface">
+              {eliminatoria
+                ? pick === "H"
+                  ? `${match.home_team} avanza`
+                  : `${match.away_team} avanza`
+                : PICK_LABEL[pick]}
+            </strong>
           ) : (
             <strong className="text-on-surface-variant">sin pronóstico</strong>
           )}
