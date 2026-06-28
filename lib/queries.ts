@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Match, Prediction } from "@/lib/types";
 import { toTemporada, type Temporada } from "@/lib/domain/temporada";
+import { CLOSE_BEFORE_KICKOFF_MS } from "@/lib/domain/jornada";
 
 /** Partidos de fase de grupos agrupados por jornada (match_date asc, kickoff asc). */
 export async function getJornadas(): Promise<Map<string, Match[]>> {
@@ -109,6 +110,43 @@ export async function getActiveParticipantCount(
   );
   if (error) throw new Error(`Error contando activos: ${error.message}`);
   return count ?? 0;
+}
+
+export interface NextMatch {
+  home: string;
+  away: string;
+  kickoffAt: string;
+}
+
+/**
+ * Próximo partido de eliminatoria todavía ABIERTO para pronosticar, para el
+ * recordatorio admin → usuario (botón en /admin/usuarios). Eliminatoria = toda
+ * fase distinta de `group_stage` (mismo criterio que `temporadaDeFase`). "Abierto"
+ * = falta más de una hora para el kickoff (kickoff > now + 1h), coherente con
+ * `CLOSE_BEFORE_KICKOFF_MS` e `isMatchOpen`, para no anunciar un partido cuyo cierre
+ * ya pasó. Devuelve null si no hay ninguno (eliminatoria sin programar o concluida).
+ */
+export async function getNextEliminatoriaMatch(): Promise<NextMatch | null> {
+  const supabase = await createClient();
+  const openThresholdIso = new Date(
+    Date.now() + CLOSE_BEFORE_KICKOFF_MS
+  ).toISOString();
+  const { data, error } = await supabase
+    .from("matches")
+    .select("home_team, away_team, kickoff_at")
+    .neq("phase", "group_stage")
+    .gt("kickoff_at", openThresholdIso)
+    .order("kickoff_at", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Error cargando próximo partido: ${error.message}`);
+  if (!data) return null;
+  return {
+    home: data.home_team,
+    away: data.away_team,
+    kickoffAt: data.kickoff_at,
+  };
 }
 
 /** Temporada activa (puntero de onboarding); default seguro `grupos`. */

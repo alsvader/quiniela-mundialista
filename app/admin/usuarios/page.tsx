@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { requireAdminPage } from "@/lib/auth/guards";
-import { getFaseActiva, getPaymentInfo } from "@/lib/queries";
-import { buildPaymentReminderLink } from "@/lib/whatsapp";
+import { getFaseActiva, getNextEliminatoriaMatch, getPaymentInfo } from "@/lib/queries";
+import {
+  buildEliminatoriaReminderLink,
+  buildPaymentReminderLink,
+} from "@/lib/whatsapp";
 import { formatDateTime } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
 import type { Profile } from "@/lib/types";
@@ -13,6 +16,7 @@ import {
 } from "@/lib/domain/temporada";
 import { UserStatusButton } from "./user-status-button";
 import { PaymentReminderButton } from "./payment-reminder-button";
+import { EliminatoriaReminderButton } from "./eliminatoria-reminder-button";
 import { SeasonParticipationButton } from "./season-participation-button";
 import { FaseActivaControl } from "./fase-activa-control";
 
@@ -27,21 +31,28 @@ const STATUS_LABEL = {
 export default async function UsuariosPage() {
   const { supabase } = await requireAdminPage();
 
-  const [{ data: profiles }, { data: emails }, { data: parts }, payment, faseActiva] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "user")
-        .order("created_at", { ascending: false }),
-      supabase.rpc("admin_user_emails"),
-      supabase
-        .from("participaciones")
-        .select("user_id, temporada, status")
-        .eq("status", "active"),
-      getPaymentInfo(),
-      getFaseActiva(),
-    ]);
+  const [
+    { data: profiles },
+    { data: emails },
+    { data: parts },
+    payment,
+    faseActiva,
+    nextEliminatoria,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "user")
+      .order("created_at", { ascending: false }),
+    supabase.rpc("admin_user_emails"),
+    supabase
+      .from("participaciones")
+      .select("user_id, temporada, status")
+      .eq("status", "active"),
+    getPaymentInfo(),
+    getFaseActiva(),
+    getNextEliminatoriaMatch(),
+  ]);
 
   const emailById = new Map(
     ((emails ?? []) as { id: string; email: string }[]).map((e) => [e.id, e.email])
@@ -151,6 +162,21 @@ export default async function UsuariosPage() {
                             }
                           />
                         )}
+                        {u.status !== "disabled" &&
+                          seasons.has("eliminatoria") && (
+                            <EliminatoriaReminderButton
+                              link={buildEliminatoriaReminderLink(
+                                u.phone,
+                                { name: u.full_name },
+                                nextEliminatoria
+                              )}
+                              disabledHint={
+                                !u.phone
+                                  ? "El usuario no tiene teléfono registrado."
+                                  : "No hay un próximo partido de eliminatoria abierto."
+                              }
+                            />
+                          )}
                         {u.status === "disabled" ? (
                           <UserStatusButton
                             userId={u.id}

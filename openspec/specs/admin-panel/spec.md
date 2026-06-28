@@ -3,9 +3,7 @@
 ## Purpose
 
 Panel administrativo con acceso restringido por rol, gestión de usuarios y partidos, captura y corrección de marcadores, configuración del número de WhatsApp y consulta del ranking.
-
 ## Requirements
-
 ### Requirement: Acceso restringido al panel
 El panel administrativo MUST ser accesible únicamente para usuarios con rol `admin`, validado en el servidor. La verificación de rol SHALL hacerse contra el perfil en base de datos, nunca contra datos controlados por el cliente.
 
@@ -21,8 +19,10 @@ El panel administrativo MUST ser accesible únicamente para usuarios con rol `ad
 El administrador SHALL poder consultar la lista de usuarios registrados (nombre,
 alias, correo, teléfono, estado de cuenta, participación por temporada, fecha de
 registro), confirmar o retirar la participación de cada usuario **por temporada**
-(`grupos` y `eliminatoria`), desactivar la cuenta completa y enviar un recordatorio
-de pago por WhatsApp a quien no participa en la temporada activa.
+(`grupos` y `eliminatoria`), desactivar la cuenta completa, enviar un recordatorio
+de pago por WhatsApp a quien no participa en la temporada activa y enviar un
+recordatorio del inicio de la fase de eliminatoria por WhatsApp a quien ya
+participa en la temporada `eliminatoria`.
 
 #### Scenario: Consulta de registrados
 - **WHEN** el administrador abre la sección de usuarios
@@ -39,6 +39,14 @@ de pago por WhatsApp a quien no participa en la temporada activa.
 #### Scenario: Recordar pago a quien no participa en la temporada activa
 - **WHEN** el administrador pulsa el recordatorio de pago en la fila de un usuario que no participa en la temporada activa
 - **THEN** se abre WhatsApp dirigido al teléfono del usuario con el mensaje de bienvenida, monto y datos de transferencia prellenados
+
+#### Scenario: Recordar el inicio de la eliminatoria a un participante
+- **WHEN** el administrador pulsa el recordatorio de eliminatoria en la fila de un usuario con participación activa en `eliminatoria`
+- **THEN** se abre WhatsApp dirigido al teléfono del usuario con el aviso de inicio de la fase, la regla de cierre (una hora antes de cada partido), el próximo partido de eliminatoria todavía abierto y el enlace a la página de pronósticos prellenados
+
+#### Scenario: Recordatorio de eliminatoria no disponible
+- **WHEN** el administrador abre la fila de un participante de `eliminatoria` sin teléfono registrado o cuando no hay un próximo partido de eliminatoria abierto
+- **THEN** el botón de recordatorio de eliminatoria aparece deshabilitado con el motivo correspondiente
 
 ### Requirement: Gestión de partidos
 El administrador SHALL poder crear y editar partidos, asignando fase, fecha, hora, equipos y, opcionalmente, el código de bandera de cada equipo y la sede (estadio y ciudad).
@@ -153,3 +161,4 @@ automáticamente ni afectar puntos, ranking o el estado en vivo.
 #### Scenario: El aviso no decide
 - **WHEN** un partido supera el umbral sin que el administrador lo finalice
 - **THEN** el partido permanece en vivo para todo el sistema hasta la finalización explícita
+
