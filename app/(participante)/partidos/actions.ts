@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { AuthorizationError, requireActiveUser } from "@/lib/auth/guards";
+import { AuthorizationError, requireEnabledAccount } from "@/lib/auth/guards";
 import { isMatchOpen } from "@/lib/domain/jornada";
 import { matchIdSchema, pickSchema } from "@/lib/schemas";
+import { temporadaDeFase, temporadaLabel } from "@/lib/domain/temporada";
 import type { Pick } from "@/lib/domain/scoring";
+import type { MatchPhase } from "@/lib/types";
 
 export type SavePickState = {
   ok?: boolean;
@@ -25,7 +27,7 @@ export async function savePick(
 ): Promise<SavePickState> {
   let session;
   try {
-    session = await requireActiveUser();
+    session = await requireEnabledAccount();
   } catch (e) {
     if (e instanceof AuthorizationError) return { error: e.message };
     throw e;
@@ -40,11 +42,28 @@ export async function savePick(
   const { supabase, user } = session;
   const { data: match, error: matchError } = await supabase
     .from("matches")
-    .select("id, kickoff_at")
+    .select("id, kickoff_at, phase")
     .eq("id", parsedId.data)
-    .maybeSingle<{ id: number; kickoff_at: string }>();
+    .maybeSingle<{ id: number; kickoff_at: string; phase: MatchPhase }>();
   if (matchError || !match)
     return { error: "No se pudo cargar el partido. Intenta de nuevo." };
+
+  // El gate ya no es el estado global de la cuenta sino la participación en la
+  // temporada del partido (RLS es la última línea). Mensaje por temporada.
+  const temporada = temporadaDeFase(match.phase);
+  const { data: participacion } = await supabase
+    .from("participaciones")
+    .select("status")
+    .eq("user_id", user.id)
+    .eq("temporada", temporada)
+    .eq("status", "active")
+    .maybeSingle();
+  if (!participacion)
+    return {
+      error: `Aún no participas en la fase de ${temporadaLabel(
+        temporada
+      ).toLowerCase()}. Realiza tu pago para activarla.`,
+    };
 
   if (!isMatchOpen(match.kickoff_at))
     return {

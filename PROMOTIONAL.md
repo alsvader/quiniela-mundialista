@@ -166,13 +166,13 @@ light backgrounds.
 Flyer de onboarding para historias (Instagram/WhatsApp) con los 5 pasos de
 activación. Usa las capturas reales de la app que viven en `promotional/`:
 
-| Archivo | Contenido |
-|---|---|
-| `flyer-01-registro.png` | Formulario de registro lleno |
-| `flyer-02-modal-whatsapp.png` | Modal "Falta validar tu pago" con botón de WhatsApp |
-| `flyer-03-pendiente.png` | Partidos en solo lectura con banner "Activar por WhatsApp" |
-| `flyer-04-admin-activa.png` | Panel admin con el usuario "Activo" (opcional) |
-| `flyer-05-pronosticos.png` | Botones L/E/V habilitados con "L" seleccionada |
+| Archivo                       | Contenido                                                  |
+| ----------------------------- | ---------------------------------------------------------- |
+| `flyer-01-registro.png`       | Formulario de registro lleno                               |
+| `flyer-02-modal-whatsapp.png` | Modal "Falta validar tu pago" con botón de WhatsApp        |
+| `flyer-03-pendiente.png`      | Partidos en solo lectura con banner "Activar por WhatsApp" |
+| `flyer-04-admin-activa.png`   | Panel admin con el usuario "Activo" (opcional)             |
+| `flyer-05-pronosticos.png`    | Botones L/E/V habilitados con "L" seleccionada             |
 
 **Cómo usarlo en ChatGPT (1 sola generación):** adjunta `flyer-01-registro.png`,
 `flyer-02-modal-whatsapp.png` y `flyer-05-pronosticos.png` al mensaje junto con
@@ -252,10 +252,10 @@ directo con el administrador, fuera de la app.
 
 Capturas de apoyo en `promotional/`:
 
-| Archivo | Contenido |
-|---|---|
-| `flyer-07-bolsa-card.png` | Tarjeta real "Bolsa acumulada" con el reparto 50/30/20 |
-| `flyer-06-ranking-bolsa.png` | Ranking público completo con la bolsa (alternativa) |
+| Archivo                      | Contenido                                              |
+| ---------------------------- | ------------------------------------------------------ |
+| `flyer-07-bolsa-card.png`    | Tarjeta real "Bolsa acumulada" con el reparto 50/30/20 |
+| `flyer-06-ranking-bolsa.png` | Ranking público completo con la bolsa (alternativa)    |
 
 **Cómo usarlo en ChatGPT (1 sola generación, sin adjuntos):** la tarjeta de
 bolsa se dibuja como réplica con un monto de ejemplo, así que no hace falta
@@ -337,10 +337,10 @@ completa toma menos de un minuto.
 
 Capturas en `promotional/`:
 
-| Archivo | Contenido |
-|---|---|
-| `flyer-08-jornada-elegida.png` | Jornada abierta con "L" y "V" elegidos y botón "Guardar jornada" |
-| `flyer-09-jornada-guardada.png` | Confirmación "✓ Jornada guardada" junto al botón |
+| Archivo                         | Contenido                                                        |
+| ------------------------------- | ---------------------------------------------------------------- |
+| `flyer-08-jornada-elegida.png`  | Jornada abierta con "L" y "V" elegidos y botón "Guardar jornada" |
+| `flyer-09-jornada-guardada.png` | Confirmación "✓ Jornada guardada" junto al botón                 |
 
 **Cómo usarlo en ChatGPT (1 sola generación):** adjunta
 `flyer-08-jornada-elegida.png` y `flyer-09-jornada-guardada.png` al mensaje
@@ -570,6 +570,170 @@ Notas:
   separado da mejor legibilidad que recortar uno del otro.
 - Mismas restricciones de marca que el resto del archivo (sin FIFA, trofeo,
   escudos ni jugadores) y misma disciplina de color del sistema "Cyber-Stadium".
+
+---
+
+## 8. Flyer "Se abre la Fase Eliminatoria" — captación de nuevos jugadores
+
+Flyer de invitación para historias (Instagram stories + estado de WhatsApp) que
+abre la quiniela a nuevos participantes ahora que arranca la fase eliminatoria del
+Mundial. Mensaje
+central: entras de cero a la fase eliminatoria por $100 MXN que cubren TODA la
+eliminatoria (16avos, 8vos, 4tos, semis, final). Reglas iguales; el cierre de cada
+partido es 1 hora antes del silbatazo.
+
+**Cómo usarlo en ChatGPT (1 sola generación):** adjunta `promotional/favicon-original.png`
+(el logo de la app) al mensaje junto con este prompt — así el balón holográfico del
+flyer es el logo real, no una recreación:
+
+```
+Design a vertical 9:16 promotional flyer for Instagram stories and WhatsApp
+status for "Quiniela Mundialista 2026", a private World Cup prediction game
+that is now opening registration for the KNOCKOUT STAGE. Premium retro-futurist
+"cyber-stadium" aesthetic with modern glassmorphism — sophisticated and
+restrained, NOT kitschy 80s synthwave, NOT a betting site.
+
+USE THE ATTACHED IMAGE as the logo: it is the app's neon wireframe football
+inside a rounded-square glass app-tile. Place it as the hero element in the
+upper third of the flyer. Keep it faithful — do not recolor or redraw it,
+only integrate it with a soft cyan glow against the scene.
+
+BACKGROUND: deep-space dark violet-purple (#1a0b2e to #150628) with a subtle
+cyan perspective grid at very low opacity (5%) receding to the floor like a
+dark high-tech stadium, a soft volumetric purple gradient and faint
+atmospheric haze for depth. Light "scan-line" edges (cyan-to-transparent
+gradients) and fine particles.
+
+TEXT ON IMAGE (in Spanish), high-contrast white (#eddcff) with subtle glow on
+accents. Use a heavy, extended, italic, condensed sans-serif for headlines
+(style of the "Anybody" typeface, tight letter spacing), a clean grotesque for
+secondary text (style of "Hanken Grotesk"), and a mono-spaced font for the
+price/data (style of "JetBrains Mono"). Hierarchy:
+1. Small neon chip at the top: "MUNDIAL 2026"
+2. Dominant headline: "FASE ELIMINATORIA"
+3. Subtitle: "¡Que empiece la eliminatoria!"
+4. A glass capsule with a magenta (#ff24e4) neon border holding the price:
+   big mono-spaced lime-green (#bded00) "$100 MXN" and, smaller below,
+   "por TODA la fase eliminatoria" with the line
+   "16avos · 8vos · 4tos · semis · final".
+5. Three short bullet points with minimal neon icons:
+   - "Pronostica hasta 1 hora antes de cada partido"
+   - "Mismas reglas, nuevos jugadores bienvenidos"
+   - "Ranking en vivo compartible"
+6. Call to action at the bottom as a solid electric-cyan (#00f3ff) button
+   with dark text: "REGÍSTRATE YA". Below the button, the registration URL in
+   mono-spaced font: "quinielamundialistas.com/registro"
+
+COLOR DISCIPLINE: dominant deep purple darkness; electric cyan (#00f3ff) as
+main accent; vibrant magenta (#ff24e4) only on the price capsule and one small
+highlight; lime green (#bded00) only for the money figure. High-contrast white
+for all text. Neon signals hierarchy — never saturated or chaotic.
+
+COMPOSITION: vertical 9:16. Vertical stacked layout: chip "MUNDIAL 2026" and
+the logo tile in the upper third, headline "FASE ELIMINATORIA" and the price
+capsule in the center, bullets and CTA in the lower third. Generous negative
+space, fully legible on a small phone screen.
+
+SAFE ZONES: keep all text and key elements out of the top 15% and bottom 15%
+of the canvas, because the stories/status UI covers those zones.
+
+MOOD: high-stakes digital arena, competitive, precise, electric; entering the
+knockout stage feels like a high-tech event among friends.
+
+AVOID: FIFA logos or the official World Cup trophy, real team crests, flags or
+player likenesses, betting-odds clutter, casino imagery, scanlines, VHS grain,
+generic corporate blue, light backgrounds, English text.
+```
+
+**Variante cuadrada 1:1 (feed de Instagram / mensaje de WhatsApp):** en la
+misma conversación, pide:
+
+```
+Ahora genera la misma pieza en formato cuadrado 1:1 para el feed de Instagram
+y para compartir por WhatsApp, manteniendo idéntica identidad visual, colores
+y textos, en composición vertical apilada: chip "MUNDIAL 2026" y logo arriba,
+titular "FASE ELIMINATORIA" y la cápsula de precio al centro, los bullets, el
+botón "REGÍSTRATE YA" y la URL "quinielamundialistas.com/registro" abajo, con
+espacio negativo generoso y un margen de seguridad de ~60px desde cada borde.
+```
+
+Notas:
+
+- **Logo adjunto vs. recreación:** si ChatGPT deforma el logo adjunto, pide la
+  misma imagen describiendo el emblema en texto (balón wireframe cian/magenta en
+  mosaico de vidrio, igual que en la sección 7) o deja un hueco con glow y monta
+  el logo real encima con Canva/Figma.
+- **Precio y reglas:** $100 MXN cubren toda la fase eliminatoria (no por ronda);
+  el cierre por partido es 1 hora antes del inicio (distinto del cierre por
+  jornada 23:59 de la fase de grupos — no mezclar ambos mensajes en este flyer).
+- **Texto largo:** como en el resto del archivo, si los bullets o la cápsula
+  salen con erratas, genera el arte/fondo y rotula el texto encima en Canva con
+  las fuentes reales de `DESIGN.md` (Anybody / Hanken Grotesk / JetBrains Mono).
+- El CTA lleva al registro de la web: botón "REGÍSTRATE YA" con la URL
+  "quinielamundialistas.com/registro" debajo. En stories de Instagram conviene
+  además poner un sticker de enlace a esa misma URL para que sea tappable.
+
+### Mensaje para acompañar el flyer (WhatsApp)
+
+Texto para enviar junto con la imagen al difundirla por WhatsApp (grupos o
+contactos). Tono cálido y directo, mismo registro que la plantilla de
+bienvenida de la app (`lib/whatsapp.ts`). Usa formato de WhatsApp (`*negritas*`)
+y emojis; pega tal cual:
+
+```
+🏆 ¡Se abre la *FASE ELIMINATORIA* de la Quiniela Mundialista! ⚽
+
+Terminó la fase de grupos y ahora puedes entrar de cero a la eliminación directa: 16avos, 8vos, 4tos, semis, tercer lugar y final.
+
+💰 $100 por TODA la eliminatoria
+⏰ Pronostica hasta 1 hora antes de cada partido
+🥇 Ranking y bolsa en vivo, todo en la app
+
+*¿Cómo entrar?*
+1️⃣ Regístrate aquí 👉 https://www.quinielamundialistas.com/registro
+2️⃣ Escríbeme por este WhatsApp y te paso los datos para tu pago de $100
+3️⃣ Haz tu transferencia y mándame tu comprobante
+4️⃣ Confirmo tu pago y ¡listo, a pronosticar!
+
+¡No te quedes fuera! 🔥
+```
+
+Notas del mensaje:
+
+- Los 4 pasos siguen el flujo real (`account-activation`): registro en la web →
+  contacto por WhatsApp para los datos de transferencia → pago + comprobante →
+  el admin confirma el pago de la temporada `eliminatoria`. El paso 2 existe
+  porque los datos bancarios solo se entregan por WhatsApp, nunca en el flyer.
+- "Escríbeme por este WhatsApp" asume que tú (admin) compartes el mensaje; si lo
+  reenvía alguien más, cámbialo por tu número, p. ej. "Escribe al 55 1234 5678".
+- El monto va como "$100" sin "MXN" para que se lea natural en chat; en el flyer
+  sí va "$100 MXN".
+
+### Versión para X (Twitter)
+
+Versión corta para publicar en X junto con la imagen (cabe en 280 caracteres).
+Más directa, sin los pasos detallados — el flyer y el enlace hacen el resto:
+
+```
+🏆 ¡Se abre la FASE ELIMINATORIA de la Quiniela Mundialista! ⚽
+
+Entra de cero a la eliminación directa (16vos → final).
+
+💰 $100 por toda la fase
+⏰ Pronostica hasta 1h antes de cada partido
+🥇 Ranking y bolsa en vivo
+
+Regístrate 👉 https://www.quinielamundialistas.com/registro
+```
+
+Notas del mensaje:
+
+- Mide ~257 caracteres (X cuenta cualquier URL como 23), así que entra holgado
+  en el límite de 280. Si agregas algo, recórtalo en otro lado para no pasarte.
+- Sin los 4 pasos a propósito: en X no hay contacto 1-a-1 como en WhatsApp; el
+  CTA lleva directo al registro y el alta se completa ahí.
+- Para dar alcance puedes cerrar con hashtags si te queda espacio, p. ej.
+  "#Mundial2026 #Quiniela" (suma ~22 caracteres, sigue cabiendo).
 
 ---
 

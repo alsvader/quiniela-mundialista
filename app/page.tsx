@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getFaseActiva, getMyParticipations } from "@/lib/queries";
 
 /** Redirección raíz según sesión y rol (design.md D9). */
 export default async function RootPage() {
@@ -18,6 +19,16 @@ export default async function RootPage() {
 
   if (!profile) redirect("/registro");
   if (profile.role === "admin") redirect("/admin/usuarios");
-  if (profile.status === "pending") redirect("/partidos?aviso=pago");
+
+  // Aviso de pago si la cuenta no participa en la fase activa (change
+  // fase-eliminatoria-temporada): el gate ya no es profiles.status sino la
+  // participación por temporada.
+  if (profile.status !== "disabled") {
+    const [faseActiva, participaciones] = await Promise.all([
+      getFaseActiva(),
+      getMyParticipations(),
+    ]);
+    if (!participaciones.has(faseActiva)) redirect("/partidos?aviso=pago");
+  }
   redirect("/partidos");
 }

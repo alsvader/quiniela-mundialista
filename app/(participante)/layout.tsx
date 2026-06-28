@@ -1,22 +1,32 @@
 import Link from "next/link";
 import { requireSession } from "@/lib/auth/guards";
-import { getWhatsappNumber } from "@/lib/queries";
+import {
+  getFaseActiva,
+  getMyParticipations,
+  getWhatsappNumber,
+} from "@/lib/queries";
 import { buildWhatsappLink } from "@/lib/whatsapp";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(public)/auth-actions";
-import { PendingBanner } from "./pending-banner";
+import { SeasonPaymentBanner } from "./season-payment-banner";
 import { isMatchOpen } from "@/lib/domain/jornada";
+import { temporadaDeFase, type Temporada } from "@/lib/domain/temporada";
+import type { MatchPhase } from "@/lib/types";
 
-/** Kickoff del próximo partido aún abierto (cierre = kickoff − 1h), o null. */
-async function nextOpenKickoff(): Promise<string | null> {
+/**
+ * Kickoff del próximo partido aún abierto (cierre = kickoff − 1h) de una
+ * temporada, o null. Acota el aviso de pago al próximo cierre de ESA fase.
+ */
+async function nextOpenKickoff(temporada: Temporada): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("matches")
-    .select("kickoff_at")
+    .select("kickoff_at, phase")
     .order("kickoff_at", { ascending: true });
   return (
-    (data ?? [])
-      .map((m) => m.kickoff_at as string)
+    ((data ?? []) as { kickoff_at: string; phase: MatchPhase }[])
+      .filter((m) => temporadaDeFase(m.phase) === temporada)
+      .map((m) => m.kickoff_at)
       .find((k) => isMatchOpen(k)) ?? null
   );
 }
@@ -28,12 +38,22 @@ export default async function ParticipanteLayout({
 }) {
   const { user, profile } = await requireSession();
 
+  // El aviso de pago se rige por la PARTICIPACIÓN en la temporada activa, no por
+  // el estado global de la cuenta (change fase-eliminatoria-temporada). Una
+  // cuenta disabled queda fuera de todo y ve su propio banner.
+  const [faseActiva, participaciones] = await Promise.all([
+    getFaseActiva(),
+    getMyParticipations(),
+  ]);
+  const debePagarFaseActiva =
+    profile.status !== "disabled" && !participaciones.has(faseActiva);
+
   let whatsappLink: string | null = null;
   let nextKickoff: string | null = null;
-  if (profile.status === "pending") {
+  if (debePagarFaseActiva) {
     const [number, kickoff] = await Promise.all([
       getWhatsappNumber(),
-      nextOpenKickoff(),
+      nextOpenKickoff(faseActiva),
     ]);
     nextKickoff = kickoff;
     whatsappLink = buildWhatsappLink(number, {
@@ -48,8 +68,12 @@ export default async function ParticipanteLayout({
 
   return (
     <div className="flex min-h-dvh flex-col overflow-x-clip">
-      {profile.status === "pending" && (
-        <PendingBanner whatsappLink={whatsappLink} nextKickoff={nextKickoff} />
+      {debePagarFaseActiva && (
+        <SeasonPaymentBanner
+          temporada={faseActiva}
+          whatsappLink={whatsappLink}
+          nextKickoff={nextKickoff}
+        />
       )}
       {profile.status === "disabled" && (
         <div

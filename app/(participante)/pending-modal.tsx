@@ -42,17 +42,17 @@ export function PendingModal({
       <h2 className="heading-display text-xl">Falta validar tu pago</h2>
       <div className="mt-4 flex flex-col gap-3 text-sm leading-relaxed text-on-surface-variant">
         <p>
-          Para participar, contacta al administrador por WhatsApp, realiza tu
-          pago (transferencia o efectivo) y envíale el comprobante. Él activará
-          tu cuenta.
+          Para entrar a la fase activa, contacta al administrador por WhatsApp,
+          realiza tu pago (transferencia o efectivo) y envíale el comprobante.
+          Él confirmará tu participación.
         </p>
         <p className="font-semibold text-on-surface">
-          Mientras tu cuenta siga pendiente no puedes guardar pronósticos.
+          Mientras no validemos tu pago no puedes guardar pronósticos de esta
+          fase.
           {deadline && (
             <> El próximo partido cierra el {deadline}.</>
           )}{" "}
-          Los partidos que cierren antes de tu activación se pierden sin
-          recurso.
+          Los partidos que cierren antes de tu pago se pierden sin recurso.
         </p>
       </div>
       <div className="mt-6 flex flex-wrap items-center gap-3">
