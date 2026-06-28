@@ -8,12 +8,19 @@ Captura de pronósticos L/E/V por partido, guardado por partido mientras ese par
 
 ### Requirement: Pronóstico por partido
 El sistema SHALL permitir a un usuario que **participa en la temporada del partido**
-seleccionar exactamente una opción por partido entre: gana local, empate o gana
-visitante. El pronóstico MUST NOT incluir marcador (goles).
+seleccionar exactamente una opción por partido. En partidos de **grupos** las
+opciones son: gana local, empate o gana visitante. En partidos de **eliminatoria**
+no existe el empate: las opciones son únicamente **gana local** o **gana visitante**,
+entendidas como "quién avanza" a la siguiente ronda, y la interfaz MUST presentarlas
+bajo ese marco ("¿Quién avanza?"). El pronóstico MUST NOT incluir marcador (goles).
 
-#### Scenario: Selección única
-- **WHEN** un usuario que participa en la temporada del partido selecciona "empate" en un partido donde ya había seleccionado "gana local"
+#### Scenario: Selección única en grupos
+- **WHEN** un usuario que participa en grupos selecciona "empate" en un partido de grupos donde ya había seleccionado "gana local"
 - **THEN** la selección queda en "empate" como única opción del partido
+
+#### Scenario: Eliminatoria sin opción de empate
+- **WHEN** un usuario consulta un partido de eliminatoria abierto en el que participa
+- **THEN** solo se le ofrecen las opciones "{local} avanza" y "{visitante} avanza", sin opción de empate
 
 #### Scenario: No participante de la temporada no puede seleccionar
 - **WHEN** un usuario que no participa en la temporada de un partido abierto intenta seleccionar una opción
@@ -23,13 +30,14 @@ visitante. El pronóstico MUST NOT incluir marcador (goles).
 El sistema SHALL guardar pronósticos por partido individual: cada partido
 abierto presenta su propia acción de guardado y el guardado de un partido MUST
 NOT depender de que otros partidos de la jornada tengan selección. El guardado
-se rechaza si el partido está cerrado o si el usuario **no participa en la
-temporada del partido**. El sistema MUST registrar la fecha y hora de la última
-modificación de cada pronóstico. Un partido que llega a su cierre sin pronóstico
-simplemente no puntúa; no hay recurso retroactivo.
+se rechaza si el partido está cerrado, si el usuario **no participa en la
+temporada del partido**, o si el pronóstico es **empate en un partido de
+eliminatoria** (opción no válida en esa temporada). El sistema MUST registrar la
+fecha y hora de la última modificación de cada pronóstico. Un partido que llega a
+su cierre sin pronóstico simplemente no puntúa; no hay recurso retroactivo.
 
 #### Scenario: Guardado exitoso de un partido
-- **WHEN** un usuario que participa en la temporada del partido selecciona una opción en un partido abierto y acciona su guardado
+- **WHEN** un usuario que participa en la temporada del partido selecciona una opción válida en un partido abierto y acciona su guardado
 - **THEN** el sistema guarda ese pronóstico y registra la fecha y hora de la modificación, sin exigir selecciones en los demás partidos de la jornada
 
 #### Scenario: Guardado de partido posterior con el primero ya iniciado
@@ -43,6 +51,10 @@ simplemente no puntúa; no hay recurso retroactivo.
 #### Scenario: Guardado sin participación en la temporada rechazado en servidor
 - **WHEN** un usuario que no participa en la temporada de un partido envía el guardado de un pronóstico de ese partido, aunque la interfaz lo hubiera permitido
 - **THEN** el servidor rechaza la operación indicando que debe pagar/activar esa temporada y no se modifica ningún pronóstico
+
+#### Scenario: Empate en eliminatoria rechazado en servidor
+- **WHEN** un usuario envía un pronóstico de "empate" en un partido de eliminatoria, aunque la interfaz no lo ofreciera
+- **THEN** el servidor rechaza la operación indicando que en eliminatoria solo se elige quién avanza, y no se guarda ningún pronóstico
 
 #### Scenario: Partido sin selección al cierre
 - **WHEN** un partido llega a su cierre sin que el usuario haya guardado pronóstico
