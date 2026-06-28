@@ -51,6 +51,11 @@ export async function savePick(
   // El gate ya no es el estado global de la cuenta sino la participación en la
   // temporada del partido (RLS es la última línea). Mensaje por temporada.
   const temporada = temporadaDeFase(match.phase);
+
+  // En eliminatoria no hay empate: solo se elige quién avanza (RLS lo refuerza).
+  if (temporada === "eliminatoria" && parsedPick.data === "D") {
+    return { error: "En eliminatoria elige quién avanza: local o visitante." };
+  }
   const { data: participacion } = await supabase
     .from("participaciones")
     .select("status")

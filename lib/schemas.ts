@@ -102,6 +102,13 @@ export const scoreSchema = z.object({
   // checkbox "Marcar como finalizado": ausente en FormData = false. Solo los
   // partidos finalizados puntúan (spec live-match / scoring-ranking).
   finished: z.coerce.boolean().default(false),
+  // Quién avanza en eliminatoria (H/A); vacío/ausente = sin definir. La
+  // coherencia goles↔avanza y la exigencia al finalizar se validan en la acción
+  // según la temporada (change eliminatoria-quien-avanza).
+  avanza: z
+    .enum(["H", "A"])
+    .nullish()
+    .or(z.literal("").transform(() => null)),
 });
 
 const FLAG_CODE_RE = /^[a-z]{2}(-[a-z]{2,3})?$/; // iso alfa-2 o regional (gb-eng)

@@ -272,6 +272,7 @@ export default async function PartidosPage({
                       lastModified: prediction
                         ? formatDateTime(prediction.updated_at)
                         : null,
+                      eliminatoria: temporada === "eliminatoria",
                     };
                     return <MatchPickCard key={m.id} match={match} />;
                   }

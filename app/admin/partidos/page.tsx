@@ -4,6 +4,7 @@ import Link from "next/link";
 import { requireAdminPage } from "@/lib/auth/guards";
 import { getJornadas } from "@/lib/queries";
 import { isMatchFinished, isMatchLive } from "@/lib/domain/jornada";
+import { temporadaDeFase } from "@/lib/domain/temporada";
 import {
   filterJornadasByDays,
   resolveSelectedDays,
@@ -110,6 +111,10 @@ export default async function AdminPartidosPage({
                     homeGoals={m.home_goals}
                     awayGoals={m.away_goals}
                     finished={isMatchFinished(m)}
+                    eliminatoria={temporadaDeFase(m.phase) === "eliminatoria"}
+                    homeTeam={m.home_team}
+                    awayTeam={m.away_team}
+                    avanza={m.avanza === "D" ? null : m.avanza}
                   />
                   <Link
                     href={`/admin/partidos/${m.id}`}

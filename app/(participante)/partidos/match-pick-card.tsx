@@ -23,13 +23,29 @@ export interface MatchForCard {
   pick: Pick | null;
   /** Última modificación formateada, o null si nunca se ha guardado */
   lastModified: string | null;
+  /** Eliminatoria: sin empate, el pronóstico es "quién avanza" (L/V). */
+  eliminatoria: boolean;
 }
 
-const OPTIONS: { value: Pick; short: string; label: (m: MatchForCard) => string }[] = [
-  { value: "H", short: "L", label: (m) => `Gana ${m.home} (local)` },
-  { value: "D", short: "E", label: () => "Empate" },
-  { value: "A", short: "V", label: (m) => `Gana ${m.away} (visitante)` },
-];
+type PickOption = { value: Pick; short: string; label: string };
+
+/**
+ * Opciones del pronóstico según la temporada (change eliminatoria-quien-avanza):
+ * grupos = L/E/V; eliminatoria = solo quién avanza (L/V, sin empate).
+ */
+function pickOptions(match: MatchForCard): PickOption[] {
+  if (match.eliminatoria) {
+    return [
+      { value: "H", short: match.home, label: `${match.home} avanza` },
+      { value: "A", short: match.away, label: `${match.away} avanza` },
+    ];
+  }
+  return [
+    { value: "H", short: "L", label: `Gana ${match.home} (local)` },
+    { value: "D", short: "E", label: "Empate" },
+    { value: "A", short: "V", label: `Gana ${match.away} (visitante)` },
+  ];
+}
 
 /**
  * Partido abierto con guardado propio (spec predictions, guardado por
@@ -75,15 +91,26 @@ export function MatchPickCard({ match }: { match: MatchForCard }) {
               {match.venue}
             </p>
           )}
+          {match.eliminatoria && (
+            <p className="label-data mb-2 text-on-surface-variant">
+              ¿Quién avanza?
+            </p>
+          )}
           <div
             role="radiogroup"
-            aria-label={`Pronóstico para ${match.home} contra ${match.away}`}
-            className="grid grid-cols-3 gap-1.5"
+            aria-label={
+              match.eliminatoria
+                ? `¿Quién avanza? ${match.home} o ${match.away}`
+                : `Pronóstico para ${match.home} contra ${match.away}`
+            }
+            className={`grid gap-1.5 ${
+              match.eliminatoria ? "grid-cols-2" : "grid-cols-3"
+            }`}
           >
-            {OPTIONS.map((opt) => (
+            {pickOptions(match).map((opt) => (
               <label
                 key={opt.value}
-                className="flex h-11 cursor-pointer select-none items-center justify-center gap-1 rounded border border-outline-variant
+                className="flex h-11 cursor-pointer select-none items-center justify-center gap-1 rounded border border-outline-variant px-2
                   font-mono text-sm font-medium text-on-surface-variant
                   transition-[background-color,border-color,color,box-shadow] duration-150 ease-(--ease-out-quart)
                   hover:border-primary-container/60
@@ -96,14 +123,14 @@ export function MatchPickCard({ match }: { match: MatchForCard }) {
                   value={opt.value}
                   defaultChecked={match.pick === opt.value}
                   onChange={() => setSelected(opt.value)}
-                  aria-label={opt.label(match)}
+                  aria-label={opt.label}
                   className="peer sr-only"
                 />
                 {/* marca de forma además del color (accesibilidad) */}
-                <span aria-hidden className="hidden text-[0.6rem] peer-checked:inline">
+                <span aria-hidden className="hidden shrink-0 text-[0.6rem] peer-checked:inline">
                   ◆
                 </span>
-                {opt.short}
+                <span className="truncate">{opt.short}</span>
               </label>
             ))}
           </div>

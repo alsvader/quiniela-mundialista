@@ -6,7 +6,7 @@ import {
   getJornadas,
   getMyPredictions,
 } from "@/lib/queries";
-import { deriveResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
+import { officialResult, scorePrediction, type Pick } from "@/lib/domain/scoring";
 import { isMatchFinished } from "@/lib/domain/jornada";
 import {
   filterJornadasByTemporada,
@@ -45,8 +45,7 @@ export default async function MisPuntosPage({
       sum +
       scorePrediction(
         predictions.get(m.id)?.pick ?? null,
-        m.home_goals!,
-        m.away_goals!
+        officialResult(temporada, m.home_goals, m.away_goals, m.avanza)
       ),
     0
   );
@@ -87,8 +86,7 @@ export default async function MisPuntosPage({
               s +
               scorePrediction(
                 predictions.get(m.id)?.pick ?? null,
-                m.home_goals!,
-                m.away_goals!
+                officialResult(temporada, m.home_goals, m.away_goals, m.avanza)
               ),
             0
           );
@@ -117,8 +115,13 @@ export default async function MisPuntosPage({
                   <tbody>
                     {withScore.map((m) => {
                       const pick = predictions.get(m.id)?.pick ?? null;
-                      const result = deriveResult(m.home_goals!, m.away_goals!);
-                      const point = scorePrediction(pick, m.home_goals!, m.away_goals!);
+                      const result = officialResult(
+                        temporada,
+                        m.home_goals,
+                        m.away_goals,
+                        m.avanza
+                      );
+                      const point = scorePrediction(pick, result);
                       const hit = point === 1;
                       return (
                         <tr
@@ -138,7 +141,7 @@ export default async function MisPuntosPage({
                             {m.home_goals}–{m.away_goals}
                           </td>
                           <td className="px-4 py-3 text-center font-mono">
-                            {PICK_SHORT[result]}
+                            {result ? PICK_SHORT[result] : "—"}
                           </td>
                           <td className="px-4 py-3 text-center font-mono">
                             {pick ? PICK_SHORT[pick] : "—"}
