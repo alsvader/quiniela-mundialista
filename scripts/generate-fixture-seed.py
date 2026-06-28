@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""Genera supabase/migrations/0002_seed_fixture.sql desde scripts/data/fixture-raw.json.
+"""Genera las migraciones de seed del fixture desde scripts/data/fixture-raw.json.
 
 El JSON es un snapshot del feed público https://fixturedownload.com/feed/json/fifa-world-cup-2026
-(sorteo oficial del 5-dic-2025, repechajes de marzo 2026 resueltos). Solo fase de grupos.
-Los ids preservan el número de partido oficial FIFA (1-72).
+(sorteo oficial del 5-dic-2025, repechajes de marzo 2026 resueltos). Cubre la fase de
+grupos (ids 1-72) y los dieciseisavos de final (round_of_32, ids 73-88, resueltos con
+los equipos reales tras la fase de grupos).
+
+Salidas (NO editar a mano):
+  - 0002_seed_fixture.sql        72 partidos de fase de grupos
+  - 0008_estadio_ciudad.sql      columnas estadio/ciudad + backfill de los 72 de grupos
+  - 0011_seed_dieciseisavos.sql  16 partidos de dieciseisavos (round_of_32)
 
 Cada equipo lleva (nombre es-MX, código de bandera ISO 3166-1 alfa-2 o regional
 para naciones constituyentes — design.md D10). Los SVG viven en public/flags/.
@@ -157,10 +163,51 @@ def main() -> None:
         "  where m.id = v.id;\n"
     )
 
+    # Dieciseisavos de final (round_of_32): los 16 partidos con RoundNumber 4.
+    # group_label NULL (eliminatoria, design D1). Estadio/ciudad inline: las
+    # columnas ya existen tras 0008, así que no hace falta backfill aparte.
+    r32_matches = [m for m in raw if m["RoundNumber"] == 4]
+    assert len(r32_matches) == 16, f"esperaba 16 dieciseisavos, hay {len(r32_matches)}"
+
+    r32_rows = []
+    for m in sorted(r32_matches, key=lambda x: x["MatchNumber"]):
+        kickoff = datetime.strptime(m["DateUtc"], "%Y-%m-%d %H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+        match_date = kickoff.astimezone(MX).date()
+        # KeyError ruidoso a propósito: un placeholder sin resolver ("1A", "3ABCDF")
+        # o un equipo desconocido no debe emitir un seed silenciosamente incompleto.
+        home, home_code = TEAMS[m["HomeTeam"]]
+        away, away_code = TEAMS[m["AwayTeam"]]
+        stadium, city = VENUES[m["Location"]]
+        r32_rows.append(
+            f"  ({m['MatchNumber']}, 'round_of_32', '{match_date}', "
+            f"'{kickoff.strftime('%Y-%m-%d %H:%M:%S+00')}', "
+            f"{sql_quote(home)}, {sql_quote(away)}, "
+            f"'{home_code}', '{away_code}', null, "
+            f"{sql_quote(stadium)}, {sql_quote(city)})"
+        )
+
+    r32_out = ROOT / "supabase/migrations/0011_seed_dieciseisavos.sql"
+    r32_out.write_text(
+        "-- Dieciseisavos de final (round_of_32): 16 partidos, Mundial 2026.\n"
+        "-- Generado por scripts/generate-fixture-seed.py; NO editar a mano.\n"
+        "-- id = número de partido oficial FIFA (73-88). group_label NULL (eliminatoria,\n"
+        "-- design D1). match_date = fecha en America/Mexico_City. Estadio/ciudad inline\n"
+        "-- (columnas ya existen tras 0008). Equipos resueltos del cuadro tras la fase\n"
+        "-- de grupos. No toca la secuencia: 0002 ya la dejó en 200.\n\n"
+        "insert into public.matches\n"
+        "  (id, phase, match_date, kickoff_at, home_team, away_team,\n"
+        "   home_code, away_code, group_label, stadium, city)\n"
+        "overriding system value\nvalues\n" + ",\n".join(r32_rows) + "\n"
+        "on conflict (id) do nothing;\n"
+    )
+
     flags = sorted({code for _, code in TEAMS.values()})
     venues = sorted({v for v in VENUES.values()})
     print(f"OK: {out} ({len(rows)} partidos, {len(flags)} banderas, {len(venues)} sedes)")
     print(f"OK: {backfill} (backfill de {len(venue_rows)} filas)")
+    print(f"OK: {r32_out} ({len(r32_rows)} dieciseisavos)")
     print(" ".join(flags))
 
 
