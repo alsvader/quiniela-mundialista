@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Match, Prediction } from "@/lib/types";
 import { toTemporada, type Temporada } from "@/lib/domain/temporada";
 import { CLOSE_BEFORE_KICKOFF_MS } from "@/lib/domain/jornada";
+import { smsWindowThresholds } from "@/lib/domain/sms-window";
 
 /** Partidos de fase de grupos agrupados por jornada (match_date asc, kickoff asc). */
 export async function getJornadas(): Promise<Map<string, Match[]>> {
@@ -147,6 +149,99 @@ export async function getNextEliminatoriaMatch(): Promise<NextMatch | null> {
     away: data.away_team,
     kickoffAt: data.kickoff_at,
   };
+}
+
+// ---------- Recordatorio automático de eliminatoria por SMS ----------
+// Acceso de datos del endpoint del cron (app/api/cron/sms-eliminatoria). Usa la
+// service role (createAdminClient): no hay sesión de usuario y debe leer
+// teléfonos y escribir el ledger saltándose RLS. NO llamar desde código de
+// usuario; estas funciones confían en que el endpoint ya validó CRON_SECRET.
+
+export interface EliminatoriaMatchForSms {
+  id: number;
+  home: string;
+  away: string;
+  kickoffAt: string;
+}
+
+/**
+ * Partidos de eliminatoria (phase != group_stage) dentro de la ventana de aviso
+ * (kickoff − 2h ≤ now < kickoff − 1h, design D3) que AÚN no tienen registro en
+ * el ledger `sms_recordatorios`. Es la lista de pendientes de notificar de esta
+ * corrida; idempotente entre ticks.
+ */
+export async function getEliminatoriaMatchesPendingSms(
+  now: Date = new Date()
+): Promise<EliminatoriaMatchForSms[]> {
+  const supabase = createAdminClient();
+  const { closeThresholdIso, noticeThresholdIso } = smsWindowThresholds(now);
+
+  const { data, error } = await supabase
+    .from("matches")
+    .select("id, home_team, away_team, kickoff_at")
+    .neq("phase", "group_stage")
+    // kickoff > now + 1h ⇒ sigue abierto ; kickoff ≤ now + 2h ⇒ ya entró la ventana
+    .gt("kickoff_at", closeThresholdIso)
+    .lte("kickoff_at", noticeThresholdIso)
+    .order("kickoff_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (error) throw new Error(`Error cargando partidos para SMS: ${error.message}`);
+
+  const candidates = (data ?? []) as {
+    id: number;
+    home_team: string;
+    away_team: string;
+    kickoff_at: string;
+  }[];
+  if (candidates.length === 0) return [];
+
+  const { data: sentRows, error: sentError } = await supabase
+    .from("sms_recordatorios")
+    .select("match_id")
+    .in(
+      "match_id",
+      candidates.map((m) => m.id)
+    );
+  if (sentError) throw new Error(`Error leyendo ledger SMS: ${sentError.message}`);
+  const sent = new Set((sentRows ?? []).map((r) => (r as { match_id: number }).match_id));
+
+  return candidates
+    .filter((m) => !sent.has(m.id))
+    .map((m) => ({
+      id: m.id,
+      home: m.home_team,
+      away: m.away_team,
+      kickoffAt: m.kickoff_at,
+    }));
+}
+
+/**
+ * Teléfonos (sin normalizar) de los participantes elegibles del aviso de
+ * eliminatoria: participación `active` en `eliminatoria` y cuenta no `disabled`.
+ * Vía la función `eliminatoria_recipients()` (security definer).
+ */
+export async function getEliminatoriaSmsPhones(): Promise<string[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.rpc("eliminatoria_recipients");
+  if (error) throw new Error(`Error cargando destinatarios SMS: ${error.message}`);
+  return ((data ?? []) as { phone: string }[]).map((r) => r.phone);
+}
+
+/**
+ * Marca el partido como atendido en el ledger (idempotencia, design D4). Se
+ * escribe SOLO tras aceptar el lote (o cuando no había destinatarios válidos,
+ * con recipients = 0 y request_id null) para no reintentar indefinidamente.
+ */
+export async function recordSmsReminderSent(
+  matchId: number,
+  requestId: string | null,
+  recipients: number
+): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("sms_recordatorios")
+    .insert({ match_id: matchId, request_id: requestId, recipients });
+  if (error) throw new Error(`Error registrando envío SMS: ${error.message}`);
 }
 
 /** Temporada activa (puntero de onboarding); default seguro `grupos`. */

@@ -175,6 +175,24 @@ export const whatsappSchema = z.object({
     ),
 });
 
+// ---------- SMS (recordatorio automático de eliminatoria) ----------
+
+// Respuesta de SMS Masivos (POST /sms/send). Se valida en la frontera del
+// cliente (lib/sms.ts) antes de confiar en `success`/`request_id`. Laxa a
+// propósito: `status` puede venir como número o cadena según el caso, y solo
+// `success` es imprescindible.
+export const smsSendResponseSchema = z.object({
+  success: z.coerce.boolean(),
+  message: z.string().optional(),
+  status: z.union([z.number(), z.string()]).optional(),
+  request_id: z.string().nullish(),
+  // Avisos del proveedor (p.ej. test_message_detected). Importan: el operador
+  // puede descartar el SMS aunque el panel reporte "Entregado".
+  warnings: z
+    .array(z.object({ code: z.string().optional(), message: z.string().optional() }))
+    .optional(),
+});
+
 // Datos de transferencia para el recordatorio de pago (design.md D1/D5).
 // Los campos pueden quedar vacíos al guardar: la completitud se valida en el
 // punto de uso (buildPaymentReminderLink), no aquí.
