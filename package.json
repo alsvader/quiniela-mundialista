@@ -10,7 +10,8 @@
     "test": "vitest run",
     "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs",
     "seed:test-users": "node --env-file=.env.local scripts/seed-test-users.mjs",
-    "smoke": "node --env-file=.env.local scripts/smoke-test.mjs"
+    "smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
+    "rotate:cron-secret": "node scripts/rotate-cron-secret.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

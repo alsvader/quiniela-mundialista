@@ -44,6 +44,33 @@ npm run build
    producción (URL + service role key + credenciales del admin).
 5. Entrar como admin a `/admin/configuracion` y capturar el número de WhatsApp.
 
+## Recordatorio automático de eliminatoria por SMS
+
+Avisa por SMS (SMS Masivos) a los participantes de la temporada `eliminatoria`
+2 h antes del kickoff de cada partido. El endpoint `/api/cron/sms-eliminatoria`
+es idempotente (ledger `sms_recordatorios`) y lo dispara `pg_cron` cada 30 min.
+
+Configuración (una vez, en producción):
+
+1. Variables en Vercel: `SMS_BASE_URL`, `SMS_API_KEY`, `SMS_SANDBOX` (`1` para
+   probar sin gastar crédito) y `CRON_SECRET`. Genera/rota el secreto con
+   `npm run rotate:cron-secret -- local` (o `prod`): lo escribe en `.env.local` /
+   `.env.prod.local` y, para `prod`, imprime los pasos de Vercel y Vault.
+2. Las migraciones `0013`/`0014` crean el ledger y habilitan `pg_cron`/`pg_net`.
+   Tras aplicarlas, crear en el **SQL editor** de Supabase los dos secretos del
+   Vault que usa el job (ver cabecera de `0014_sms_cron_job.sql`):
+
+   ```sql
+   select vault.create_secret(
+     'https://<tu-dominio>/api/cron/sms-eliminatoria', 'sms_cron_url');
+   select vault.create_secret('<mismo-CRON_SECRET-de-Vercel>', 'cron_secret');
+   ```
+
+3. Verificar end-to-end con `SMS_SANDBOX=1` antes del primer partido: invocar el
+   endpoint con el header `x-cron-secret` y confirmar que registra en el ledger y
+   que una segunda corrida no reenvía. Apagar el envío: `select
+   cron.unschedule('sms-eliminatoria-30min');`.
+
 ## Reglas de negocio clave
 
 - **Jornada** = partidos del mismo día en `America/Mexico_City`; cierra a las
