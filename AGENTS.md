@@ -35,3 +35,8 @@ decisiones de producto/stack en `openspec/config.yaml`.
   y autorización SIEMPRE en servidor (la UI nunca es la única defensa).
 - Zona horaria canónica: America/Mexico_City (jornadas y cierres).
 - Puntos y ranking siempre derivados (nunca almacenados); ver design.md D5.
+- Para sembrar los partidos de una ronda nueva del fixture (resolver equipos,
+  generar la migración, aplicarla en local y en prod) seguir el runbook
+  `SEEDING.md` (raíz); las reglas de comportamiento viven en
+  `openspec/specs/data-seeding/spec.md`. Las migraciones de seed se generan con
+  `scripts/generate-fixture-seed.py`; NO editarlas a mano.
