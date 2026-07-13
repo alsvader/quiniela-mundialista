@@ -44,6 +44,21 @@ npm run build
    producción (URL + service role key + credenciales del admin).
 5. Entrar como admin a `/admin/configuracion` y capturar el número de WhatsApp.
 
+## Sembrar rondas del fixture
+
+El fixture completo se genera desde un snapshot del feed con
+`scripts/generate-fixture-seed.py`; las migraciones de seed **no se editan a
+mano**. La fase de grupos ya está sembrada; cada ronda de eliminatoria se siembra
+cuando el cuadro resuelve los equipos (dieciseisavos → … → final).
+
+Flujo por ronda: resolver los equipos en `scripts/data/fixture-raw.json` →
+añadir el bloque de la ronda al generador → regenerar → probar en local
+(`npx supabase migration up --local`) → aplicar en prod
+(`npx supabase db push --linked`).
+
+El runbook completo (reglas e invariantes del seed, comandos exactos y
+verificación en local y prod) está en **`SEEDING.md`**.
+
 ## Recordatorio automático de eliminatoria por SMS
 
 Avisa por SMS (SMS Masivos) a los participantes de la temporada `eliminatoria`
