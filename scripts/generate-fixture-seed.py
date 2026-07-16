@@ -4,17 +4,18 @@
 El JSON es un snapshot del feed público https://fixturedownload.com/feed/json/fifa-world-cup-2026
 (sorteo oficial del 5-dic-2025, repechajes de marzo 2026 resueltos). Cubre la fase de
 grupos (ids 1-72), los dieciseisavos de final (round_of_32, ids 73-88), los octavos
-de final (round_of_16, ids 89-96), los cuartos de final (quarter_final, ids 97-100)
-y las semifinales (semi_final, ids 101-102), resueltos con los equipos reales
-conforme avanza el cuadro.
+de final (round_of_16, ids 89-96), los cuartos de final (quarter_final, ids 97-100),
+las semifinales (semi_final, ids 101-102) y el tercer lugar + la final (third_place,
+final, ids 103-104), resueltos con los equipos reales conforme avanza el cuadro.
 
 Salidas (NO editar a mano):
-  - 0002_seed_fixture.sql        72 partidos de fase de grupos
-  - 0008_estadio_ciudad.sql      columnas estadio/ciudad + backfill de los 72 de grupos
-  - 0011_seed_dieciseisavos.sql  16 partidos de dieciseisavos (round_of_32)
-  - 0015_seed_octavos.sql        8 partidos de octavos (round_of_16)
-  - 0016_seed_cuartos.sql        4 partidos de cuartos (quarter_final)
-  - 0017_seed_semifinales.sql    2 partidos de semifinales (semi_final)
+  - 0002_seed_fixture.sql               72 partidos de fase de grupos
+  - 0008_estadio_ciudad.sql             columnas estadio/ciudad + backfill de los 72 de grupos
+  - 0011_seed_dieciseisavos.sql         16 partidos de dieciseisavos (round_of_32)
+  - 0015_seed_octavos.sql               8 partidos de octavos (round_of_16)
+  - 0016_seed_cuartos.sql               4 partidos de cuartos (quarter_final)
+  - 0017_seed_semifinales.sql           2 partidos de semifinales (semi_final)
+  - 0018_seed_final_tercer_lugar.sql    tercer lugar (third_place) + final (final)
 
 Cada equipo lleva (nombre es-MX, código de bandera ISO 3166-1 alfa-2 o regional
 para naciones constituyentes — design.md D10). Los SVG viven en public/flags/.
@@ -328,6 +329,52 @@ def main() -> None:
         "on conflict (id) do nothing;\n"
     )
 
+    # Tercer lugar y final: los 2 partidos con RoundNumber 8. Es la única ronda
+    # que mezcla dos fases distintas, así que la phase se asigna por MatchNumber
+    # (103 = third_place, 104 = final), no una sola para todo el round. Misma
+    # estructura que las demás eliminatorias (group_label NULL, sede inline).
+    # Equipos resueltos del cuadro tras las semifinales.
+    R8_PHASE = {103: "third_place", 104: "final"}
+    r2_matches = [m for m in raw if m["RoundNumber"] == 8]
+    assert len(r2_matches) == 2, f"esperaba 2 partidos (3er lugar + final), hay {len(r2_matches)}"
+
+    r2_rows = []
+    for m in sorted(r2_matches, key=lambda x: x["MatchNumber"]):
+        kickoff = datetime.strptime(m["DateUtc"], "%Y-%m-%d %H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
+        match_date = kickoff.astimezone(MX).date()
+        # KeyError ruidoso a propósito: un placeholder sin resolver ("To be announced")
+        # no debe emitir un seed silenciosamente incompleto.
+        home, home_code = TEAMS[m["HomeTeam"]]
+        away, away_code = TEAMS[m["AwayTeam"]]
+        stadium, city = VENUES[m["Location"]]
+        phase = R8_PHASE[m["MatchNumber"]]  # KeyError si aparece un MatchNumber inesperado
+        r2_rows.append(
+            f"  ({m['MatchNumber']}, '{phase}', '{match_date}', "
+            f"'{kickoff.strftime('%Y-%m-%d %H:%M:%S+00')}', "
+            f"{sql_quote(home)}, {sql_quote(away)}, "
+            f"'{home_code}', '{away_code}', null, "
+            f"{sql_quote(stadium)}, {sql_quote(city)})"
+        )
+
+    r2_out = ROOT / "supabase/migrations/0018_seed_final_tercer_lugar.sql"
+    r2_out.write_text(
+        "-- Tercer lugar (third_place) y final (final): 2 partidos, Mundial 2026.\n"
+        "-- Generado por scripts/generate-fixture-seed.py; NO editar a mano.\n"
+        "-- id = número de partido oficial FIFA (103 = 3er lugar, 104 = final). Única\n"
+        "-- ronda con dos fases distintas: la phase se asigna por id, no una sola para\n"
+        "-- todo el round. group_label NULL (eliminatoria, design D1). match_date = fecha\n"
+        "-- en America/Mexico_City. Estadio/ciudad inline (columnas ya existen tras 0008).\n"
+        "-- Equipos resueltos del cuadro tras las semifinales. No toca la secuencia: 0002\n"
+        "-- ya la dejó en 200.\n\n"
+        "insert into public.matches\n"
+        "  (id, phase, match_date, kickoff_at, home_team, away_team,\n"
+        "   home_code, away_code, group_label, stadium, city)\n"
+        "overriding system value\nvalues\n" + ",\n".join(r2_rows) + "\n"
+        "on conflict (id) do nothing;\n"
+    )
+
     flags = sorted({code for _, code in TEAMS.values()})
     venues = sorted({v for v in VENUES.values()})
     print(f"OK: {out} ({len(rows)} partidos, {len(flags)} banderas, {len(venues)} sedes)")
@@ -336,6 +383,7 @@ def main() -> None:
     print(f"OK: {r16_out} ({len(r16_rows)} octavos)")
     print(f"OK: {r8_out} ({len(r8_rows)} cuartos)")
     print(f"OK: {r4_out} ({len(r4_rows)} semifinales)")
+    print(f"OK: {r2_out} ({len(r2_rows)} partidos: 3er lugar + final)")
     print(" ".join(flags))
 
 
